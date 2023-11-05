@@ -1,52 +1,108 @@
 <script setup lang="ts">
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-import Greet from "./components/Greet.vue";
+import TopLinks from "./components/TopLinks.vue"
+import TitleBar from "./components/TitleBar.vue"
+
+import { provide, ref } from "vue"
+import { useStorage } from "@vueuse/core"
+
+import { UpdateTitleFunctionalKey } from "./token"
+
+const title = ref("RocoKindom Rank Room")
+function titleUpdateFn(change: string) {
+	title.value = change
+}
+provide(UpdateTitleFunctionalKey, { titleUpdateFn })
+
+const slideDirection = useStorage(
+	"rocox-navigation-transition-direction",
+	"slideleft"
+)
 </script>
 
 <template>
-  <div class="container">
-    <h1>Welcome to Tauri!</h1>
+	<!-- <div id="app-main" @contextmenu.prevent></div> -->
+	<div id="app-main">
+		<TitleBar :titleText="title" />
+		<TopLinks />
 
-    <div class="row">
-      <a href="https://vitejs.dev" target="_blank">
-        <img src="/vite.svg" class="logo vite" alt="Vite logo" />
-      </a>
-      <a href="https://tauri.app" target="_blank">
-        <img src="/tauri.svg" class="logo tauri" alt="Tauri logo" />
-      </a>
-      <a href="https://vuejs.org/" target="_blank">
-        <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-      </a>
-    </div>
-
-    <p>Click on the Tauri, Vite, and Vue logos to learn more.</p>
-
-    <p>
-      Recommended IDE setup:
-      <a href="https://code.visualstudio.com/" target="_blank">VS Code</a>
-      +
-      <a href="https://github.com/johnsoncodehk/volar" target="_blank">Volar</a>
-      +
-      <a href="https://github.com/tauri-apps/tauri-vscode" target="_blank"
-        >Tauri</a
-      >
-      +
-      <a href="https://github.com/rust-lang/rust-analyzer" target="_blank"
-        >rust-analyzer</a
-      >
-    </p>
-
-    <Greet />
-  </div>
+		<router-view id="context" v-slot="{ Component }">
+			<Transition :name="slideDirection" mode="out-in" :appear="true">
+				<keep-alive :include="['Home', 'About', 'Setting']">
+					<component :is="Component" :key="$route.fullPath" />
+				</keep-alive>
+			</Transition>
+		</router-view>
+	</div>
 </template>
 
-<style scoped>
-.logo.vite:hover {
-  filter: drop-shadow(0 0 2em #747bff);
+<style lang="postcss">
+html.dark {
+	color-scheme: dark;
 }
 
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #249b73);
+@font-face {
+	src: url("./assets/SourceHanSerifCN-VF.ttf");
+	font-family: "SourceHanSerifCN";
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+	@apply w-2;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+	@apply bg-slate-200 dark:bg-slate-600;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+	@apply bg-slate-400 shadow;
+}
+</style>
+
+<style lang="postcss">
+.slideleft-enter-active,
+.slideleft-leave-active,
+.slideup-enter-active,
+.slideup-leave-active,
+.slidedown-enter-active,
+.slidedown-leave-active,
+.slideright-enter-active,
+.slideright-leave-active {
+	@apply transition-all;
+}
+
+.slideleft-enter-from,
+.slideleft-leave-to {
+	@apply translate-x-4 opacity-0;
+}
+.slideright-enter-from,
+.slideright-leave-to {
+	@apply -translate-x-4 opacity-0;
+}
+.slideup-enter-from {
+	@apply translate-y-0 opacity-0;
+}
+.slideup-leave-to {
+	@apply translate-y-2 opacity-0;
+}
+.slidedown-enter-from {
+	@apply translate-y-0 opacity-0;
+}
+.slidedown-leave-to {
+	@apply -translate-y-2 opacity-0;
+}
+</style>
+
+<style scoped lang="postcss">
+#app-main {
+	@apply relative w-full h-full
+	border border-slate-400
+	bg-slate-50 dark:bg-slate-700
+	text-slate-700 dark:text-slate-100
+	transition-all duration-200 ease-in-out
+	overflow-hidden;
+
+	font-family: "SourceHanSerifCN";
+}
+
+#context {
+	@apply relative flex w-full min-h-[702px] flex-col justify-start items-center px-4;
 }
 </style>
