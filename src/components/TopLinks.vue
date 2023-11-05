@@ -1,12 +1,15 @@
 <script lang="ts" setup>
+import SocketState from "./SocketState.vue"
 import {
 	UserGroupIcon,
 	QuestionMarkCircleIcon,
 	Cog6ToothIcon,
 } from "@heroicons/vue/20/solid"
 
-import { computed } from "vue"
+import { computed, inject } from "vue"
 import { RouterLink, useRoute } from "vue-router"
+
+import { SocketStateKey } from "../token"
 
 const $route = useRoute()
 const shouldShowLinksPath = ["home", "setting", "about"]
@@ -15,6 +18,8 @@ const hasActivedLink = computed(() => {
 		(($route.name as string) ?? "").toLowerCase()
 	)
 })
+
+const socketState = inject(SocketStateKey, { id: "", connected: false })
 </script>
 
 <template>
@@ -32,6 +37,12 @@ const hasActivedLink = computed(() => {
 				<QuestionMarkCircleIcon class="icon" />
 				<span class="text">关于</span>
 			</RouterLink>
+
+			<SocketState
+				class="links-status"
+				:id="socketState.id"
+				:connected="socketState.connected"
+			/>
 		</div>
 	</Transition>
 </template>
@@ -56,7 +67,7 @@ const hasActivedLink = computed(() => {
 	@apply w-4 h-4 mr-1;
 }
 
-.links-menu {
+.links-status {
 	@apply fixed left-4 z-10;
 }
 </style>

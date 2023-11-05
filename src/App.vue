@@ -2,10 +2,12 @@
 import TopLinks from "./components/TopLinks.vue"
 import TitleBar from "./components/TitleBar.vue"
 
-import { provide, ref } from "vue"
+import { onMounted, provide, reactive, ref } from "vue"
 import { useStorage } from "@vueuse/core"
+import type { Socket } from "socket.io-client"
+import { useSocket } from "./composables/useSocket"
 
-import { UpdateTitleFunctionalKey } from "./token"
+import { SocketStateKey, UpdateTitleFunctionalKey } from "./token"
 
 const title = ref("RocoKindom Rank Room")
 function titleUpdateFn(change: string) {
@@ -17,6 +19,34 @@ const slideDirection = useStorage(
 	"rocox-navigation-transition-direction",
 	"slideleft"
 )
+
+const socketState = reactive<{
+	id: string
+	connected: boolean
+	io: Socket | undefined
+}>({
+	id: "",
+	connected: false,
+	io: undefined,
+})
+const { initSocket } = useSocket()
+
+onMounted(() => {
+	const socket = initSocket()
+
+	socket.on("connect", () => {
+		socketState.connected = socket.connected
+		socketState.id = socket.id
+		socketState.io = socket
+	})
+	socket.on("disconnect", () => {
+		socketState.connected = socket.connected
+		socketState.id = ""
+		socketState.io = undefined
+	})
+})
+
+provide(SocketStateKey, socketState)
 </script>
 
 <template>
