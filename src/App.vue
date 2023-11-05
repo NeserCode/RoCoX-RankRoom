@@ -84,6 +84,32 @@ html.dark {
 .custom-scrollbar::-webkit-scrollbar-thumb {
 	@apply bg-slate-400 shadow;
 }
+
+input[type="text"],
+input[type="password"],
+input[type="number"],
+select {
+	@apply inline-flex items-center py-1 px-2
+  text-base font-bold
+  border-2 border-gray-300 dark:border-gray-500 caret-slate-400
+  bg-slate-100 dark:bg-slate-600
+  focus:ring-2 focus:border-green-300 dark:focus:border-green-500 ring-green-300 dark:ring-green-500
+  outline-none shadow-lg transition-all rounded
+	selection:bg-green-400 selection:dark:bg-green-600;
+}
+input[type="text"]::placeholder,
+input[type="password"]::placeholder {
+	@apply select-none transition-all;
+}
+
+input[type="submit"] {
+	@apply inline-flex items-center py-1 px-2
+  text-base font-bold
+  border-2 border-gray-300 dark:border-gray-500 caret-slate-400
+  bg-slate-100 dark:bg-slate-600
+  focus:ring-2 focus:border-green-300 dark:focus:border-green-500 ring-green-300 dark:ring-green-500
+  outline-none shadow-lg transition-all rounded;
+}
 </style>
 
 <style lang="postcss">
