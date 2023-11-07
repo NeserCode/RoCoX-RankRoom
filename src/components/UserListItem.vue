@@ -1,28 +1,20 @@
 <script lang="ts" setup>
 import { toRefs } from "vue"
 
-const $props = withDefaults(
-	defineProps<{
-		socketId: string
-		username: string
-		userRank: {
-			level: number
-			standard: number
-			stars: number
-		}
-	}>(),
-	{
-		socketId: "",
-		username: "",
-		userRank: () => ({
-			level: 0,
-			standard: 0,
-			stars: 0,
-		}),
-	}
-)
+import type { UserListItemProps } from "../shared"
 
-const { socketId, username, userRank } = toRefs($props)
+const $props = withDefaults(defineProps<UserListItemProps>(), {
+	socketId: "",
+	username: "",
+	userRank: () => ({
+		level: 0,
+		standard: 0,
+		stars: 0,
+	}),
+	rankVisable: false,
+})
+
+const { username, userRank, rankVisable } = toRefs($props)
 
 const computedRank = (level: number, standard: number, star: number) => {
 	const levelText =
@@ -59,22 +51,33 @@ const computedRank = (level: number, standard: number, star: number) => {
 			standardText = "I"
 			break
 	}
-	return `${levelText}·${standardText}·${star}星`
+	return `${levelText} · ${standardText} · ${star}星`
 }
 </script>
 
 <template>
 	<div class="user-list-item">
-		<span class="username">{{ username }}</span>
-		<span class="rank">{{
-			computedRank(userRank.level, userRank.standard, userRank.stars)
+		<span class="username">{{ username === "" ? "无名客" : username }}</span>
+		<span class="rank" v-if="rankVisable">{{
+			computedRank(userRank.level as number, userRank.standard, userRank.stars)
 		}}</span>
 	</div>
 </template>
 
 <style lang="postcss" scoped>
 .user-list-item {
-	@apply w-fit h-fit inline-flex justify-center items-center
-	text-sm;
+	@apply w-fit h-fit inline-flex justify-center items-center px-1 py-0.5 gap-0.5
+	rounded-md bg-white dark:bg-slate-600
+	border-2 box-content border-slate-300 dark:border-slate-500
+	text-sm font-semibold transition-all ease-in-out duration-300 overflow-hidden;
+}
+
+.username {
+	@apply max-w-[10ch] inline-block pr-1 mr-1
+	truncate
+	border-r-2 border-slate-300 dark:border-slate-500;
+}
+.username:last-child {
+	@apply max-w-[20ch] border-none mr-0 pr-0;
 }
 </style>

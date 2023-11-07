@@ -9,9 +9,11 @@ import {
 import { ref, onMounted, toRefs, watch } from "vue"
 import { useRoute } from "vue-router"
 import { useStorage, useThrottleFn } from "@vueuse/core"
-import { useDarkMode } from "../composables/useDarkMode"
 
 import { appWindow } from "@tauri-apps/api/window"
+
+import { useDarkMode } from "../composables/useDarkMode"
+import { useConstants } from "../composables/useConstant"
 
 const $props = withDefaults(
 	defineProps<{
@@ -22,15 +24,12 @@ const $props = withDefaults(
 	}
 )
 const { titleText } = toRefs($props)
+
 const $route = useRoute()
+const { TitleMapData } = useConstants()
 
 const title = ref("Rocox Rank Room")
-const titleMap = new Map([
-	["", "Rocox Rank Room"],
-	["home", "房间"],
-	["setting", "设置"],
-	["about", "关于"],
-])
+const titleMap = new Map(TitleMapData as Iterable<[string, string]>)
 const isAlwaysonTop = useStorage("rocox-always-on-top", false)
 
 function updateTitle() {
@@ -93,9 +92,6 @@ const { isDarkMode, toggleDarkMode } = useDarkMode()
 <template>
 	<div id="app-title-bar" data-tauri-drag-region>
 		<span class="title" data-tauri-drag-region>
-			<!-- <span class="icon" data-tauri-drag-region>
-				<img src="../../assets/hf.jpg" alt="!@" />
-			</span> -->
 			<span data-tauri-drag-region>{{ title }} · {{ titleText }}</span>
 		</span>
 		<div class="buttons" data-tauri-drag-region>

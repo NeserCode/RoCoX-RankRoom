@@ -4,10 +4,14 @@ import TitleBar from "./components/TitleBar.vue"
 
 import { onMounted, provide, reactive, ref } from "vue"
 import { useStorage } from "@vueuse/core"
-import type { Socket } from "socket.io-client"
 import { useSocket } from "./composables/useSocket"
 
-import { SocketStateKey, UpdateTitleFunctionalKey } from "./token"
+import {
+	SocketEmiterFunctionKey,
+	SocketStateKey,
+	UpdateTitleFunctionalKey,
+} from "./token"
+import type { SocketRenderState } from "./shared"
 
 const title = ref("RocoKindom Rank Room")
 function titleUpdateFn(change: string) {
@@ -20,16 +24,12 @@ const slideDirection = useStorage(
 	"slideleft"
 )
 
-const socketState = reactive<{
-	id: string
-	connected: boolean
-	io: Socket | undefined
-}>({
+const socketState = reactive<SocketRenderState>({
 	id: "",
 	connected: false,
 	io: undefined,
 })
-const { initSocket } = useSocket()
+const { initSocket, useUsers } = useSocket()
 
 onMounted(() => {
 	const socket = initSocket()
@@ -47,6 +47,7 @@ onMounted(() => {
 })
 
 provide(SocketStateKey, socketState)
+provide(SocketEmiterFunctionKey, { useUsers })
 </script>
 
 <template>
@@ -120,7 +121,9 @@ input[type="submit"] {
 .slidedown-enter-active,
 .slidedown-leave-active,
 .slideright-enter-active,
-.slideright-leave-active {
+.slideright-leave-active,
+.fade-enter-active,
+.fade-leave-active {
 	@apply transition-all;
 }
 
@@ -143,6 +146,11 @@ input[type="submit"] {
 }
 .slidedown-leave-to {
 	@apply -translate-y-2 opacity-0;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+	@apply opacity-0;
 }
 </style>
 

@@ -3,16 +3,12 @@ import { SignalIcon, SignalSlashIcon } from "@heroicons/vue/24/solid"
 
 import { computed, toRefs } from "vue"
 
-const $props = withDefaults(
-	defineProps<{
-		id?: string
-		connected?: boolean
-	}>(),
-	{
-		id: "",
-		connected: false,
-	}
-)
+import type { SocketRenderStateProps } from "../shared"
+
+const $props = withDefaults(defineProps<SocketRenderStateProps>(), {
+	id: "",
+	connected: false,
+})
 
 const { connected, id } = toRefs($props)
 const computedConnectedClass = computed(() =>
@@ -33,9 +29,11 @@ const computedConnectedClass = computed(() =>
 
 <style lang="postcss" scoped>
 #socket-state {
-	@apply flex flex-col justify-center
+	@apply flex flex-col justify-center px-3 py-1
+	border-2 rounded border-slate-200 dark:border-slate-500
+	bg-slate-100 dark:bg-slate-600
   font-black text-sm
-  select-none;
+  transition-all ease-in-out duration-300 select-none;
 }
 
 .with-icon {

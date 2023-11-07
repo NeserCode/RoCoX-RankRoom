@@ -44,7 +44,7 @@ onActivated(async () => {
 	<div>
 		<div class="avatar-container">
 			<img
-				src="https://avatars.githubusercontent.com/u/73767966?v=4"
+				src="../assets/q.jpg"
 				alt="Author Avatar"
 				draggable="false"
 				@dblclick="toggleAvatarRounded"
