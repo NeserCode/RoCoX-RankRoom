@@ -29,26 +29,26 @@ const computedRank = (level: number, standard: number, star: number) => {
 			: level == 4
 			? "魔导士"
 			: "圣魔导师"
-	let standardText = "I"
+	let standardText = "~"
 
 	switch (Number(standard)) {
-		case 0:
+		case 1:
 			standardText = "I"
 			break
-		case 1:
+		case 2:
 			standardText = "II"
 			break
-		case 2:
+		case 3:
 			standardText = "III"
 			break
-		case 3:
+		case 4:
 			standardText = "IV"
 			break
-		case 4:
+		case 5:
 			standardText = "V"
 			break
 		default:
-			standardText = "I"
+			standardText = "~"
 			break
 	}
 	return `${levelText} · ${standardText} · ${star}星`

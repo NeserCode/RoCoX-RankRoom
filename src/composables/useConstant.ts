@@ -1,3 +1,5 @@
+import { IORankBattle, UserInfo } from "../shared"
+
 export const useConstants = () => {
 	return {
 		NormalMessageType: ["JOIN_SERVER", "LEFT_SERVER", "USER_UPDATE"],
@@ -12,6 +14,16 @@ export const useConstants = () => {
 			level: 0,
 			standard: 0,
 			stars: 0,
+		},
+		DefaultRoom: {
+			id: "",
+			name: "",
+			password: "",
+			users: [] as UserInfo[],
+			rank: {
+				state: "RANK_READY" as "RANK_READY",
+				battles: [] as IORankBattle[],
+			},
 		},
 	}
 }

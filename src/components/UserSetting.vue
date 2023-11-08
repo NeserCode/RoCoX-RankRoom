@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { ExclamationCircleIcon } from "@heroicons/vue/24/solid"
+import Toggle from "./UI/Toggle.vue"
 import { useStorage } from "@vueuse/core"
 import { computed, inject, reactive, ref } from "vue"
 
@@ -63,6 +65,43 @@ const getStarRound = (level: string | number) => {
 			return [0, 0]
 	}
 }
+const plusStars = () => {
+	const { level, standard, stars } = userRankSetting
+	const [min, max] = getStarRound(level)
+	const [min2, max2] = getStandardRound(level)
+
+	if (stars > max || stars < min || standard > max2 || standard < min2) return
+
+	if (stars + 1 <= max) userRankSetting.stars = stars + 1
+	else if (standard + 1 <= max2) {
+		userRankSetting.standard = standard + 1
+		userRankSetting.stars = 0
+	} else {
+		if (parseInt(level as string) === 5) return
+		const [min3, _max3] = getStandardRound(parseInt(level as string) + 1)
+		userRankSetting.level = parseInt(level as string) + 1
+		userRankSetting.standard = min3
+		userRankSetting.stars = 0
+	}
+}
+const minusStars = () => {
+	const { level, standard, stars } = userRankSetting
+	const [min, max] = getStarRound(level)
+	const [min2, max2] = getStandardRound(level)
+
+	if (stars < min || stars > max || standard < min2 || standard > max2) return
+	if (stars - 1 >= min) userRankSetting.stars = stars - 1
+	else if (standard - 1 >= min2) {
+		userRankSetting.standard = standard - 1
+		userRankSetting.stars = max
+	} else {
+		if (parseInt(level as string) === 0) return
+		const [min3, _max3] = getStandardRound(parseInt(level as string) - 1)
+		userRankSetting.level = parseInt(level as string) - 1
+		userRankSetting.standard = min3
+		userRankSetting.stars = max
+	}
+}
 
 const { useUsers } = inject<{ useUsers: () => IORenderUserFunction }>(
 	SocketEmiterFunctionKey,
@@ -81,12 +120,14 @@ const updateUserRank = () => {
 		}),
 	})
 }
+
+// const enabledQuickChange = useStorage("rocox-enabled-quick-user-setting", false)
 </script>
 
 <template>
 	<div class="user-setting">
 		<form class="user-info" @submit.prevent="updateUserRank">
-			<span class="title">昵称与段位</span>
+			<span class="title">昵称与段位 · {{ isSame ? "已" : "未" }}同步</span>
 			<input
 				type="text"
 				class="nickname"
@@ -126,12 +167,22 @@ const updateUserRank = () => {
 				:max="getStarRound(userRankSetting.level!)[1]"
 			/>
 
-			<input
-				class="user-submit"
-				type="submit"
-				value="保存修改"
-				:disabled="isSame"
-			/>
+			<span class="btns">
+				<button class="btn" type="button" @click="minusStars">-1</button>
+				<button class="btn" type="button" @click="plusStars">+1</button>
+				<input
+					class="user-submit"
+					type="submit"
+					value="保存修改"
+					:disabled="isSame"
+				/>
+			</span>
+			<span class="tip">
+				<ExclamationCircleIcon class="icon" />
+				<span class="text"
+					>信息在未连接服务器时先同步至本地，而后在连接服务器时将直接使用更新后的信息同步。</span
+				>
+			</span>
 		</form>
 	</div>
 </template>
@@ -156,12 +207,23 @@ const updateUserRank = () => {
 	@apply w-20 text-center;
 }
 
+.btns {
+	@apply inline-flex justify-center items-center gap-2;
+}
 .user-submit {
-	@apply w-fit mx-96
+	@apply w-fit
   cursor-pointer;
 }
 
 .title {
 	@apply inline-block w-full font-bold text-sm select-none opacity-75;
+}
+
+.tip {
+	@apply w-full inline-flex gap-1 justify-center
+	text-sm font-bold text-slate-400;
+}
+.tip .icon {
+	@apply w-6 h-6;
 }
 </style>

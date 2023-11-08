@@ -35,8 +35,6 @@ const { NormalMessageType } = useConstants()
 const isShowRank = useStorage("rocox-is-show-rank", false)
 const isOnlyShowImportant = useStorage("rocox-is-only-show-important", false)
 const sortedMessageList = computed(() => {
-	console.log(messageList.value)
-
 	if (isOnlyShowImportant.value)
 		return messageList.value.filter(
 			(msg) => !NormalMessageType.includes(msg.data.type)
@@ -93,13 +91,15 @@ onBeforeUnmount(() => {
 	})
 })
 onActivated(() => {
-	userListEl.value!.scrollTo({
-		top: scrollTops.users,
-		behavior: "smooth",
-	})
-	messageListRef.value!.scrollTo({
-		top: scrollTops.messages,
-		behavior: "smooth",
+	nextTick(() => {
+		userListEl.value!.scrollTo({
+			top: scrollTops.users,
+			behavior: "smooth",
+		})
+		messageListRef.value!.scrollTo({
+			top: scrollTops.messages,
+			behavior: "smooth",
+		})
 	})
 })
 </script>

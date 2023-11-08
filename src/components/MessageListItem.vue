@@ -50,9 +50,7 @@ const timeText = computed(() => {
 		return `${Math.floor(diff / oneMinute)} 分钟前`
 	} else if (diff < oneDay) {
 		const hours = Math.floor(diff / oneHour)
-		const minutes = Math.floor((diff % oneHour) / oneMinute)
-		const seconds = Math.floor(diff % oneMinute)
-		return `${hours} 小时 ${minutes} 分钟 ${seconds} 秒前`
+		return `${hours} 小时前`
 	} else if (diff < oneDay * 2) {
 		return "昨天 " + new Date(t).toLocaleString()
 	} else {

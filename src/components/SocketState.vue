@@ -4,6 +4,7 @@ import { SignalIcon, SignalSlashIcon } from "@heroicons/vue/24/solid"
 import { computed, toRefs } from "vue"
 
 import type { SocketRenderStateProps } from "../shared"
+import { useStorage } from "@vueuse/core"
 
 const $props = withDefaults(defineProps<SocketRenderStateProps>(), {
 	id: "",
@@ -14,6 +15,7 @@ const { connected, id } = toRefs($props)
 const computedConnectedClass = computed(() =>
 	connected.value ? "connected" : "disconnected"
 )
+const socketDelay = useStorage<number>("rocox-socket-delay", -1)
 </script>
 
 <template>
@@ -21,7 +23,9 @@ const computedConnectedClass = computed(() =>
 		<span class="with-icon">
 			<SignalIcon v-if="connected" class="icon" />
 			<SignalSlashIcon v-else class="icon" />
-			<span class="state-text">{{ connected ? "已连接" : "未连接" }}</span>
+			<span class="state-text"
+				>{{ connected ? "已连接" : "未连接" }} {{ socketDelay }}ms</span
+			>
 		</span>
 		<span class="id">{{ id }}</span>
 	</div>
@@ -46,7 +50,7 @@ const computedConnectedClass = computed(() =>
 }
 
 .connected .with-icon {
-	@apply text-green-400 dark:text-green-500;
+	@apply text-green-500 dark:text-green-500;
 }
 
 .id {

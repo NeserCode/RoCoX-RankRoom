@@ -29,7 +29,7 @@ const socketState = reactive<SocketRenderState>({
 	connected: false,
 	io: undefined,
 })
-const { initSocket, useUsers } = useSocket()
+const { initSocket, useUsers, useRooms } = useSocket()
 
 onMounted(() => {
 	const socket = initSocket()
@@ -47,7 +47,7 @@ onMounted(() => {
 })
 
 provide(SocketStateKey, socketState)
-provide(SocketEmiterFunctionKey, { useUsers })
+provide(SocketEmiterFunctionKey, { useUsers, useRooms })
 </script>
 
 <template>
@@ -103,13 +103,15 @@ input[type="password"]::placeholder {
 	@apply select-none transition-all;
 }
 
-input[type="submit"] {
+input[type="submit"],
+button.btn {
 	@apply inline-flex items-center py-1 px-2
   text-base font-bold
   border-2 border-gray-300 dark:border-gray-500 caret-slate-400
-  bg-slate-100 dark:bg-slate-600
+  bg-white dark:bg-slate-700
   focus:ring-2 focus:border-green-300 dark:focus:border-green-500 ring-green-300 dark:ring-green-500
-  outline-none shadow-lg transition-all rounded;
+  outline-none shadow-lg transition-all rounded
+	disabled:opacity-60 disabled:cursor-not-allowed;
 }
 </style>
 
