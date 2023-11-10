@@ -18,6 +18,7 @@ export const useConstants = () => {
 		DefaultRoom: {
 			id: "",
 			name: "",
+			host: "",
 			password: "",
 			users: [] as UserInfo[],
 			rank: {

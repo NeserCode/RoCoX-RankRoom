@@ -28,24 +28,22 @@ export interface UserInfo {
 	socketId: string
 	username: string
 	userRank: StoragedUserRank
+	userRankPrefer?: "LEVEL" | "BADGE"
 }
 
 export interface IOMessageData {
-	type: "JOIN_SERVER" | "LEFT_SERVER" | "USER_UPDATE"
 	user: UserInfo
-	t: number
 }
 
 export interface IOMessage {
 	data: IOMessageData
+	type: "JOIN_SERVER" | "LEFT_SERVER" | "USER_UPDATE"
 	io: { id: string }
 	state: IOState
+	t: number
 }
 
-export interface UserListItemProps {
-	socketId: string
-	username: string
-	userRank: UserRank
+export interface UserListItemProps extends UserInfo {
 	rankVisable: boolean
 }
 
@@ -55,6 +53,9 @@ export interface IORenderUserFunction {
 
 export interface IORenderRoomFunction {
 	createRoom: (id: string, password: string, name: string) => void
+	joinRoom: (id: string, password?: string) => void
+	leftRoom: (id: string) => void
+	destoryRoom: (id: string, password: string) => void
 }
 
 export interface IORenderFunction {
@@ -84,7 +85,17 @@ export interface IORank {
 export interface IORoom {
 	id: string
 	name: string
+	host: string
 	password: string
 	users: UserInfo[]
 	rank: IORank
+}
+
+export interface RoomMessage {
+	roomId: string
+	type: "ROOM_ERROR" | "ROOM_WARNING" | "ROOM_SUCCESS"
+	data: {
+		message?: string
+	}
+	t: number
 }

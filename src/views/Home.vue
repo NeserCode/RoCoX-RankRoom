@@ -37,7 +37,7 @@ const isOnlyShowImportant = useStorage("rocox-is-only-show-important", false)
 const sortedMessageList = computed(() => {
 	if (isOnlyShowImportant.value)
 		return messageList.value.filter(
-			(msg) => !NormalMessageType.includes(msg.data.type)
+			(msg) => !NormalMessageType.includes(msg.type)
 		)
 	return messageList.value
 })
@@ -157,7 +157,7 @@ onActivated(() => {
 					<template v-if="sortedMessageList.length">
 						<MessageListItem
 							v-for="message in sortedMessageList"
-							:key="message.data.t"
+							:key="message.t"
 							:message="message"
 						/>
 					</template>
@@ -198,7 +198,7 @@ onActivated(() => {
 .message-container {
 	@apply w-2/3 h-full flex flex-col
 	text-base font-semibold
-	overflow-y-auto transition-all duration-300;
+	overflow-y-auto overflow-x-hidden transition-all duration-300;
 }
 
 .placeholder {

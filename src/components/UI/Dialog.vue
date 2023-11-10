@@ -64,7 +64,7 @@ const isOpen = defineModel<boolean>("open")
 	bg-opacity-50 dark:bg-opacity-20 cursor-not-allowed;
 }
 .dialog-panel {
-	@apply w-full max-w-lg p-6 overflow-hidden text-left
+	@apply w-full max-w-lg px-6 py-4 overflow-hidden text-left
 	align-middle transition-all transform
 	bg-gray-50 dark:bg-gray-800 shadow-xl rounded-2xl cursor-auto;
 }
@@ -84,6 +84,6 @@ const isOpen = defineModel<boolean>("open")
 	border-gray-200 dark:border-gray-700 overflow-y-auto;
 }
 .dialog-title {
-	@apply flex items-center py-2 text-lg font-medium leading-6 select-none;
+	@apply flex items-center py-2 text-lg font-semibold leading-6 select-none;
 }
 </style>

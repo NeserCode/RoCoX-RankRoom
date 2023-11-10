@@ -1,8 +1,12 @@
 import { io } from "socket.io-client"
 import { useStorage } from "@vueuse/core"
 import { nextTick } from "vue"
+import { toast } from "vue3-toastify"
 
 import { useConstants } from "./useConstant"
+import { useDarkMode } from "../composables/useDarkMode"
+
+const { isDarkMode } = useDarkMode()
 
 import type {
 	IORenderFunction,
@@ -30,6 +34,7 @@ export const useSocket: () => IORenderFunction = () => {
 	const username = useStorage<string>("rocox-username", "")
 	const userRank = useStorage<UserRank>("rocox-user-rank", DefaultUserRank)
 	const room = useStorage<IORoom>("rocox-room", DefaultRoom)
+	const roomList = useStorage<IORoom[]>("rocox-room-list", [])
 
 	const socketDelay = useStorage<number>("rocox-socket-delay", -1)
 
@@ -62,6 +67,7 @@ export const useSocket: () => IORenderFunction = () => {
 				userList.value = []
 				messageList.value = []
 				room.value = DefaultRoom
+				roomList.value = []
 			})
 
 			socket.on("messages:update", (list) => {
@@ -69,18 +75,33 @@ export const useSocket: () => IORenderFunction = () => {
 					messageList.value = list
 					socketDelay.value =
 						new Date().getTime() -
-						messageList.value[messageList.value.length - 1].data.t
+						messageList.value[messageList.value.length - 1].t
 				})
 			})
 
-			socket.on("rooms:update", (roomData: IORoom) => {
+			socket.on("rooms:update", (roomData: IORoom[]) => {
 				nextTick(() => {
-					room.value = roomData
+					roomList.value = roomData
 				})
 			})
 
-			socket.on("rooms:error", ({ message }) => {
-				console.log(message)
+			socket.on("rooms:success", (data) => {
+				console.log(data)
+				toast.success(data.data.message, {
+					theme: isDarkMode.value ? "dark" : "light",
+				})
+			})
+			socket.on("rooms:error", (data) => {
+				console.log(data)
+				toast.error(data.data.message, {
+					theme: isDarkMode.value ? "dark" : "light",
+				})
+			})
+			socket.on("rooms:warning", (data) => {
+				console.log(data)
+				toast.warning(data.data.message, {
+					theme: isDarkMode.value ? "dark" : "light",
+				})
 			})
 
 			return socket
@@ -100,6 +121,18 @@ export const useSocket: () => IORenderFunction = () => {
 						name,
 						password,
 					})
+				},
+				joinRoom: (id, password) => {
+					socket.emit("rooms:join", {
+						id,
+						password,
+					})
+				},
+				leftRoom: (id) => {
+					socket.emit("rooms:left", id)
+				},
+				destoryRoom: (id, password) => {
+					socket.emit("rooms:destory", { id, password })
 				},
 			}
 		},

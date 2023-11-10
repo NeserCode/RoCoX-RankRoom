@@ -2,24 +2,31 @@
 import { useStorage } from "@vueuse/core"
 import { computed, onMounted, ref, toRefs } from "vue"
 
-import type { IOMessage } from "../shared"
+import type { IOMessage, RoomMessage } from "../shared"
+import { useConstants } from "../composables/useConstant"
 
 const $props = withDefaults(
 	defineProps<{
-		message: IOMessage
+		message: IOMessage | RoomMessage
 	}>(),
 	{}
 )
 const { message } = toRefs($props)
+const { NormalMessageType } = useConstants()
+const isNormalMessage = computed(() =>
+	NormalMessageType.includes(message.value.type)
+)
 
 const messageText = computed(() => {
+	if (!isNormalMessage.value) return
+
 	const socketId = useStorage("rocox-socket-id", "")
 	const name =
-		socketId.value === message.value.io?.id!
+		socketId.value === (message.value as IOMessage).io?.id!
 			? "你"
-			: message.value.data?.user?.username
+			: (message.value as IOMessage).data?.user?.username
 
-	switch (message.value.data.type) {
+	switch (message.value.type) {
 		case "JOIN_SERVER": {
 			return `${name} 连接了服务器。`
 		}
@@ -31,11 +38,9 @@ const messageText = computed(() => {
 		}
 	}
 })
-const timeText = computed(() => {
-	const t = message.value.data!.t
-
+const getComputedTimeString = (t: number) => {
 	const now = new Date()
-	const diff = now.getTime() - message.value.data!.t
+	const diff = now.getTime() - t
 	const oneSecond = 1000
 	const oneMinute = 60 * oneSecond
 	const oneHour = 60 * oneMinute
@@ -62,8 +67,7 @@ const timeText = computed(() => {
 		const ss = String(new Date(t).getSeconds()).padStart(2, "0")
 		return `${yyyy}-${mm}-${dd} ${hh}:${mm2}:${ss}`
 	}
-})
-
+}
 const el = ref<HTMLElement | null>(null)
 onMounted(() => {
 	setTimeout(() => {
@@ -75,16 +79,24 @@ onMounted(() => {
 </script>
 
 <template>
-	<div :class="['message-list-item', message.data?.type]" ref="el">
-		<span class="time">{{ timeText }}</span>
+	<div
+		:class="['message-list-item', message.type]"
+		ref="el"
+		v-if="isNormalMessage"
+	>
+		<span class="time">{{ getComputedTimeString(message.t) }}</span>
 		<span class="text">{{ messageText }}</span>
+	</div>
+	<div :class="['message-list-item', message.type]" ref="el" v-else>
+		<span class="time">{{ getComputedTimeString(message.t) }}</span>
+		<span class="text">{{ (message as RoomMessage).data.message }} </span>
 	</div>
 </template>
 
 <style>
 @keyframes appearFromLeftTop {
 	0% {
-		opacity: 0.25;
+		opacity: 0;
 		transform: scale(0.2);
 	}
 
@@ -101,7 +113,7 @@ onMounted(() => {
 </style>
 <style lang="postcss" scoped>
 .message-list-item {
-	@apply w-fit max-w-md inline-flex flex-col justify-center px-1 py-0.5 my-0.5
+	@apply w-fit max-w-sm inline-flex flex-col justify-center px-1 py-0.5 my-0.5
 	border-2 rounded border-slate-300 dark:border-slate-500
 	bg-white dark:bg-slate-600
 	transition-all transform ease-in-out duration-300 select-none;
@@ -109,11 +121,39 @@ onMounted(() => {
 	animation: appearFromLeftTop 0.3s forwards ease-in-out;
 }
 
+.message-list-item::after {
+	@apply absolute inline-block -right-[8ch]
+	text-sm font-semibold opacity-0 transition-all ease-in-out duration-300;
+	content: "Normal";
+}
+.message-list-item:hover::after {
+	@apply opacity-100;
+}
+
 .text {
-	@apply truncate;
+	@apply text-base;
 }
 .time {
 	@apply inline-block font-black text-xs
-	opacity-50;
+	opacity-60;
+}
+
+/* Types */
+.message-list-item.ROOM_SUCCESS::after,
+.message-list-item.ROOM_ERROR::after {
+	@apply -right-[7ch];
+	content: "Room";
+}
+.message-list-item.ROOM_ERROR:hover::after {
+	@apply opacity-100;
+}
+
+.message-list-item.ROOM_SUCCESS {
+	@apply border-green-400 dark:border-green-500
+	bg-green-200 dark:bg-green-800;
+}
+.message-list-item.ROOM_ERROR {
+	@apply border-red-400 dark:border-red-500
+	bg-red-200 dark:bg-red-800;
 }
 </style>
