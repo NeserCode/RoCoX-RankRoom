@@ -49,7 +49,7 @@ const socketState = inject(SocketStateKey, { id: "", connected: false })
 
 <style lang="postcss" scoped>
 #top-links {
-	@apply w-full h-full flex items-center justify-center py-4;
+	@apply relative w-full h-full flex items-center justify-center py-4;
 }
 
 .link {
@@ -68,6 +68,6 @@ const socketState = inject(SocketStateKey, { id: "", connected: false })
 }
 
 .links-status {
-	@apply fixed left-4 z-10;
+	@apply absolute left-4 z-10;
 }
 </style>

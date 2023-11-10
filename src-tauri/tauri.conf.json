@@ -19,6 +19,10 @@
 			},
 			"window": {
 				"all": true
+			},
+			"http": {
+				"all": true,
+				"scope": ["https://rocoxdevrankkey--nesercode.repl.co/*"]
 			}
 		},
 		"bundle": {

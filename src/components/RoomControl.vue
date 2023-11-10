@@ -2,23 +2,40 @@
 import { CubeIcon, CubeTransparentIcon } from "@heroicons/vue/24/solid"
 import Dialog from "./UI/Dialog.vue"
 
-import { inject, reactive, ref } from "vue"
+import { computed, inject, onMounted, reactive, ref } from "vue"
 import { useStorage } from "@vueuse/core"
 // @ts-ignore
 import CryptoJS from "crypto-js"
+import { fetch } from "@tauri-apps/api/http"
 
-import { SocketEmiterFunctionKey } from "../token"
-import type { IORenderRoomFunction, IORoom } from "../shared"
+import { SocketEmiterFunctionKey, SocketStateKey } from "../token"
+import { useConstants } from "../composables/useConstant"
+import type { IORenderRoomFunction, IORoom, SocketRenderState } from "../shared"
+import { toast } from "vue3-toastify"
+import { useDarkMode } from "../composables/useDarkMode"
+
+const socketState = inject<SocketRenderState>(SocketStateKey, {
+	id: "",
+	connected: false,
+	io: undefined,
+})
+const { DefaultRoom } = useConstants()
+const { isDarkMode } = useDarkMode()
 
 const isShowCreateRoomPanel = ref(false)
 const openCreateRoomPanel = () => {
 	isShowCreateRoomPanel.value = true
 }
 
+const roomInputs = reactive({
+	roomId: "",
+	password: "",
+})
 const roomCreateData = reactive({
 	id: "",
 	name: "",
 	password: "",
+	creationKey: "",
 })
 
 const { useRooms } = inject<{ useRooms: () => IORenderRoomFunction }>(
@@ -32,22 +49,64 @@ const { useRooms } = inject<{ useRooms: () => IORenderRoomFunction }>(
 		}),
 	}
 )
-const { createRoom } = useRooms()
+const { createRoom, joinRoom, leftRoom, destoryRoom } = useRooms()
 const socketId = useStorage<string>("rocox-socket-id", "")
 const roomList = useStorage<IORoom[]>("rocox-room-list", [])
+const roomData = useStorage<IORoom>("rocox-room", DefaultRoom)
+const IOCreationKey = useStorage<string>("rocox-io-creation-key", "")
 
-const createIORoom = () => {
+const isJoinedRoom = computed(() => roomData.value.id !== "")
+const isHostRoom = computed(() => roomData.value.host === socketId.value)
+
+const useFetchKey = async (hash: string): Promise<string> => {
+	const response = await fetch<string>(
+		`https://rocoxdevrankkey--nesercode.repl.co/key?username=${hash}`,
+		{
+			method: "GET",
+			responseType: 2,
+		}
+	)
+
+	return response.data
+}
+
+const createIORoom = async () => {
+	const veryifyKey = await useFetchKey(roomCreateData.creationKey)
+	if (IOCreationKey.value !== veryifyKey) {
+		toast.error("Creation Key is not valid", {
+			theme: isDarkMode.value ? "dark" : "light",
+		})
+
+		roomCreateData.creationKey = ""
+		return
+	}
+
 	const { id, password, name } = roomCreateData
-	createRoom(id, CryptoJS.AES.encrypt(password, "rocox").toString(), name)
+	createRoom(id, CryptoJS.HmacMD5(password, "rocox").toString(), name)
 	isShowCreateRoomPanel.value = false
 	roomCreateData.id = ""
 	roomCreateData.password = ""
 	roomCreateData.name = ""
+	roomCreateData.creationKey = ""
 }
+const joinIORoom = () => {
+	const { roomId, password } = roomInputs
+	joinRoom(roomId, CryptoJS.HmacMD5(password, "rocox").toString())
+	roomInputs.roomId = ""
+	roomInputs.password = ""
+}
+const leftIORoom = () => {
+	leftRoom(roomData.value.id)
+}
+const destoryIORoom = () => {
+	const { password } = roomInputs
+	destoryRoom(roomData.value.id, CryptoJS.HmacMD5(password, "rocox").toString())
+	roomInputs.password = ""
+}
+
 const useSocketIdforRoomId = () => {
 	roomCreateData.id = socketId.value
 }
-
 const isShowRoomListPanel = ref(false)
 const openRoomListPanel = () => {
 	isShowRoomListPanel.value = true
@@ -60,15 +119,52 @@ const copyText = async (text: string) => {
 
 <template>
 	<div id="room-control">
-		<form class="room">
-			<input type="text" class="room-name" placeholder="房间编号*" required />
-			<input type="password" class="room-key" placeholder="密钥（选填）" />
-			<input type="submit" class="btn" value="加入" />
-			<button type="button" class="btn" @click="openCreateRoomPanel">
+		<form
+			class="room"
+			@submit.prevent="!isHostRoom ? joinIORoom() : destoryIORoom()"
+		>
+			<input
+				type="text"
+				class="room-name"
+				placeholder="房间编号*"
+				required
+				v-model="roomInputs.roomId"
+				v-if="!isJoinedRoom"
+			/>
+			<input
+				type="password"
+				class="room-key"
+				placeholder="密钥"
+				v-model="roomInputs.password"
+				v-if="!isJoinedRoom || isHostRoom"
+				:required="isHostRoom"
+			/>
+			<input
+				type="submit"
+				class="btn"
+				:disabled="!socketState.connected"
+				value="加入"
+				v-if="!isJoinedRoom"
+			/>
+			<button class="btn" v-if="isJoinedRoom" type="button" @click="leftIORoom">
+				退出房间
+			</button>
+			<button class="btn" v-if="isHostRoom">销毁房间</button>
+			<button
+				type="button"
+				class="btn"
+				:disabled="!socketState.connected"
+				@click="openCreateRoomPanel"
+			>
 				<CubeIcon class="icon" />
 				<span class="text">创建</span>
 			</button>
-			<button type="button" class="btn" @click="openRoomListPanel">
+			<button
+				type="button"
+				class="btn"
+				:disabled="!socketState.connected"
+				@click="openRoomListPanel"
+			>
 				<CubeIcon class="icon" />
 				<span class="text">房间 {{ roomList.length }}</span>
 			</button>
@@ -97,6 +193,13 @@ const copyText = async (text: string) => {
 						class="room-key"
 						placeholder="密钥*"
 						v-model="roomCreateData.password"
+					/>
+					<input
+						type="password"
+						required
+						class="room-secret-key"
+						placeholder="授权密钥*"
+						v-model="roomCreateData.creationKey"
 					/>
 					<button type="button" class="btn" @click="useSocketIdforRoomId">
 						使用连接编号用作房间编号
@@ -154,11 +257,11 @@ form.room {
 }
 
 .room-create {
-	@apply inline-flex items-center flex-wrap gap-2 p-2;
+	@apply inline-flex items-center flex-wrap mt-4 mb-8 p-2 gap-2;
 }
 
 .room-list-placeholder {
-	@apply flex flex-col justify-center items-center gap-2
+	@apply flex flex-col justify-center items-center my-8 gap-2
 	text-base;
 }
 .room-list-placeholder .icon {

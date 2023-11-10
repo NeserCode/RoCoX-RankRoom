@@ -140,7 +140,8 @@ onMounted(() => {
 
 /* Types */
 .message-list-item.ROOM_SUCCESS::after,
-.message-list-item.ROOM_ERROR::after {
+.message-list-item.ROOM_ERROR::after,
+.message-list-item.ROOM_WARNING::after {
 	@apply -right-[7ch];
 	content: "Room";
 }
@@ -151,6 +152,10 @@ onMounted(() => {
 .message-list-item.ROOM_SUCCESS {
 	@apply border-green-400 dark:border-green-500
 	bg-green-200 dark:bg-green-800;
+}
+.message-list-item.ROOM_WARNING {
+	@apply border-yellow-400 dark:border-yellow-500
+	bg-yellow-200 dark:bg-yellow-700;
 }
 .message-list-item.ROOM_ERROR {
 	@apply border-red-400 dark:border-red-500

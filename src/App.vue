@@ -110,7 +110,7 @@ button.btn {
   border-2 border-gray-300 dark:border-gray-500 caret-slate-400
   bg-white dark:bg-slate-700
   focus:ring-2 focus:border-green-300 dark:focus:border-green-500 ring-green-300 dark:ring-green-500
-  outline-none shadow-lg transition-all rounded
+  outline-none shadow-lg transition-all rounded select-none
 	disabled:opacity-60 disabled:cursor-not-allowed;
 }
 </style>

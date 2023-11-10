@@ -9,9 +9,11 @@ import "vue3-toastify/dist/index.css"
 
 createApp(App)
 	.use(Vue3Toasity, {
-		autoClose: 3000,
+		autoClose: 6000,
 		closeButton: false,
 		icon: false,
+		position: "bottom-right",
+		limit: 2,
 		// ...
 	} as ToastContainerOptions)
 	.use(router)

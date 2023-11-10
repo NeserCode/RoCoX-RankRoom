@@ -24,7 +24,8 @@ const socketDelay = useStorage<number>("rocox-socket-delay", -1)
 			<SignalIcon v-if="connected" class="icon" />
 			<SignalSlashIcon v-else class="icon" />
 			<span class="state-text"
-				>{{ connected ? "已连接" : "未连接" }} {{ socketDelay }}ms</span
+				>{{ connected ? "已连接" : "未连接" }}
+				<span class="delay" v-if="connected">{{ socketDelay }}ms</span></span
 			>
 		</span>
 		<span class="id">{{ id }}</span>
@@ -54,7 +55,7 @@ const socketDelay = useStorage<number>("rocox-socket-delay", -1)
 }
 
 .id {
-	@apply max-w-[18ch]
+	@apply max-w-[24ch]
   text-xs truncate opacity-75;
 }
 </style>

@@ -18,12 +18,11 @@ import type {
 
 const ENV = import.meta.env
 
-const isProduction = ENV.NODE_ENV === "production"
-const serverPort = isProduction ? ENV.PORT : 3000
-const serverDomain = isProduction ? ENV.DOMAIN : "localhost"
+const serverPort = ENV.SOCKET_PORT
+const serverDomain = ENV.SOCKET_DOMAIN
 
 const serverAddress = `${
-	ENV.SOCKET_SECURE ? "wss" : "ws"
+	parseInt(ENV.SOCKET_SECURE) ? "wss" : "ws"
 }://${serverDomain}:${serverPort}`
 
 const { DefaultUserRank, DefaultRoom } = useConstants()
@@ -35,6 +34,7 @@ export const useSocket: () => IORenderFunction = () => {
 	const userRank = useStorage<UserRank>("rocox-user-rank", DefaultUserRank)
 	const room = useStorage<IORoom>("rocox-room", DefaultRoom)
 	const roomList = useStorage<IORoom[]>("rocox-room-list", [])
+	const IOCreationKey = useStorage<string>("rocox-io-creation-key", "")
 
 	const socketDelay = useStorage<number>("rocox-socket-delay", -1)
 
@@ -47,8 +47,20 @@ export const useSocket: () => IORenderFunction = () => {
 		},
 	})
 
+	const initData = () => {
+		socketId.value = ""
+		userList.value = []
+		messageList.value = []
+		room.value = DefaultRoom
+		roomList.value = []
+		socketDelay.value = -1
+		IOCreationKey.value = ""
+	}
+
 	return {
 		initSocket: () => {
+			initData()
+
 			socket.on("connect", () => {
 				socketId.value = socket.id
 				socket.emit("users:connect", {
@@ -62,12 +74,12 @@ export const useSocket: () => IORenderFunction = () => {
 				userList.value = data
 			})
 
+			socket.on("key:creation", (key) => {
+				IOCreationKey.value = key
+			})
+
 			socket.on("disconnect", () => {
-				socketId.value = ""
-				userList.value = []
-				messageList.value = []
-				room.value = DefaultRoom
-				roomList.value = []
+				initData()
 			})
 
 			socket.on("messages:update", (list) => {
@@ -84,7 +96,6 @@ export const useSocket: () => IORenderFunction = () => {
 					roomList.value = roomData
 				})
 			})
-
 			socket.on("rooms:success", (data) => {
 				console.log(data)
 				toast.success(data.data.message, {
@@ -100,6 +111,20 @@ export const useSocket: () => IORenderFunction = () => {
 			socket.on("rooms:warning", (data) => {
 				console.log(data)
 				toast.warning(data.data.message, {
+					theme: isDarkMode.value ? "dark" : "light",
+				})
+			})
+
+			socket.on("rooms:join", (roomData: IORoom) => {
+				room.value = roomData
+			})
+			socket.on("rooms:left", () => {
+				room.value = DefaultRoom
+			})
+			socket.on("rooms:destory", (roomData: IORoom) => {
+				if (roomData.id === room.value.id) room.value = DefaultRoom
+				if (roomData.host === socketId.value) return
+				toast.error("所在房间已被房主销毁，自动退出房间", {
 					theme: isDarkMode.value ? "dark" : "light",
 				})
 			})
