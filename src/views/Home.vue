@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { SignalSlashIcon, CubeTransparentIcon } from "@heroicons/vue/24/solid"
 import RoomControl from "../components/RoomControl.vue"
+import RankControl from "../components/RankControl.vue"
 import UserListItem from "../components/UserListItem.vue"
 import MessageListItem from "../components/MessageListItem.vue"
 import Toggle from "../components/UI/Toggle.vue"
@@ -173,6 +174,7 @@ onActivated(() => {
 			</div>
 		</div>
 		<RoomControl />
+		<RankControl />
 	</div>
 </template>
 

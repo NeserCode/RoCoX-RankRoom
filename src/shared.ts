@@ -58,13 +58,30 @@ export interface IORenderRoomFunction {
 	destoryRoom: (id: string, password: string) => void
 }
 
+export interface IORankFunction {
+	updateConfig: (config: IORankConfig) => void
+}
+
+export interface IORankConfig {
+	type: "RANK_NORMAL" | "RANK_BADGE" | "RANK_CUSTOM"
+	round: {
+		round: number
+		count: number
+	}
+}
+
 export interface IORenderFunction {
 	initSocket: () => Socket
 	useUsers: () => IORenderUserFunction
 	useRooms: () => IORenderRoomFunction
+	useRank: () => IORankFunction
 }
 
-export type IORankState = "RANK_READY" | "RANK_RUNNING" | "RANK_FINISHED"
+export type IORankState =
+	| "RANK_READY"
+	| "RANK_COUNTING"
+	| "RANK_RANKING"
+	| "RANK_FINISHED"
 export type IORankBattleState = "BATTLE_SUCCESS" | "BATTLE_FAIL"
 export interface IORankBattleDiff {
 	winStar: number

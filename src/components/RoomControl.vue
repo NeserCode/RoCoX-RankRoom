@@ -1,8 +1,12 @@
 <script lang="ts" setup>
-import { CubeIcon, CubeTransparentIcon } from "@heroicons/vue/24/solid"
+import {
+	CubeIcon,
+	CubeTransparentIcon,
+	QuestionMarkCircleIcon,
+} from "@heroicons/vue/24/solid"
 import Dialog from "./UI/Dialog.vue"
 
-import { computed, inject, onMounted, reactive, ref } from "vue"
+import { computed, inject, reactive, ref } from "vue"
 import { useStorage } from "@vueuse/core"
 // @ts-ignore
 import CryptoJS from "crypto-js"
@@ -113,6 +117,9 @@ const openRoomListPanel = () => {
 }
 
 const copyText = async (text: string) => {
+	toast(`复制 ${text}`, {
+		theme: isDarkMode.value ? "dark" : "light",
+	})
 	await navigator.clipboard.writeText(text)
 }
 </script>
@@ -134,7 +141,7 @@ const copyText = async (text: string) => {
 			<input
 				type="password"
 				class="room-key"
-				placeholder="密钥"
+				placeholder="管理密钥"
 				v-model="roomInputs.password"
 				v-if="!isJoinedRoom || isHostRoom"
 				:required="isHostRoom"
@@ -146,10 +153,15 @@ const copyText = async (text: string) => {
 				value="加入"
 				v-if="!isJoinedRoom"
 			/>
-			<button class="btn" v-if="isJoinedRoom" type="button" @click="leftIORoom">
+			<button
+				class="btn danger"
+				v-if="isJoinedRoom"
+				type="button"
+				@click="leftIORoom"
+			>
 				退出房间
 			</button>
-			<button class="btn" v-if="isHostRoom">销毁房间</button>
+			<button class="btn danger" v-if="isHostRoom">销毁房间</button>
 			<button
 				type="button"
 				class="btn"
@@ -178,6 +190,7 @@ const copyText = async (text: string) => {
 						class="room-name"
 						placeholder="房间名称*"
 						required
+						autofocus
 						v-model="roomCreateData.name"
 					/>
 					<input
@@ -191,7 +204,7 @@ const copyText = async (text: string) => {
 						type="password"
 						required
 						class="room-key"
-						placeholder="密钥*"
+						placeholder="管理密钥*"
 						v-model="roomCreateData.password"
 					/>
 					<input
@@ -222,15 +235,22 @@ const copyText = async (text: string) => {
 					<tbody align="center">
 						<tr class="room-list-item" v-for="room in roomList" :key="room.id">
 							<td>{{ room.name }}</td>
-							<td @dblclick="copyText(room.id)">{{ room.id }}</td>
+							<td @dblclick="copyText(room.id)" class="room-row-id">
+								{{ room.id }}
+							</td>
 							<td>{{ room.users.length }}</td>
 						</tr>
 					</tbody>
 				</table>
+
 				<div class="room-list-placeholder" v-else>
 					<CubeTransparentIcon class="icon" />
 					<span class="text">房间列表为空</span>
 				</div>
+				<span class="tip" v-if="roomList.length">
+					<QuestionMarkCircleIcon class="icon" />
+					<span class="text">双击房间编号以复制该编号</span>
+				</span>
 			</template>
 		</Dialog>
 	</div>
@@ -241,7 +261,8 @@ const copyText = async (text: string) => {
 	@apply w-full h-full flex py-4 px-2;
 }
 
-.icon {
+.room-list-placeholder .icon,
+button .icon {
 	@apply w-4 h-4 inline-block mr-0.5;
 }
 
@@ -257,7 +278,7 @@ form.room {
 }
 
 .room-create {
-	@apply inline-flex items-center flex-wrap mt-4 mb-8 p-2 gap-2;
+	@apply inline-flex items-center flex-wrap mt-2 mb-6 p-2 gap-2;
 }
 
 .room-list-placeholder {
@@ -269,7 +290,7 @@ form.room {
 }
 
 .room-list {
-	@apply w-full h-fit border-collapse table-auto
+	@apply w-full h-fit my-4 border-collapse table-auto
 	border-2 rounded
 	text-base
 	border-gray-300 dark:border-gray-600;
@@ -280,5 +301,8 @@ form.room {
 }
 .room-list th {
 	@apply bg-slate-200 dark:bg-slate-600;
+}
+.room-row-id {
+	@apply cursor-pointer;
 }
 </style>

@@ -161,5 +161,12 @@ export const useSocket: () => IORenderFunction = () => {
 				},
 			}
 		},
+		useRank: () => {
+			return {
+				updateConfig: (config) => {
+					socket.emit("rank:config", config)
+				},
+			}
+		},
 	}
 }

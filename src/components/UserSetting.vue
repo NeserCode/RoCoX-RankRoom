@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { ExclamationCircleIcon } from "@heroicons/vue/24/solid"
-import Toggle from "./UI/Toggle.vue"
+import { QuestionMarkCircleIcon } from "@heroicons/vue/24/solid"
+// import Toggle from "./UI/Toggle.vue"
 import { useStorage } from "@vueuse/core"
 import { computed, inject, reactive, ref } from "vue"
 
@@ -96,10 +96,11 @@ const minusStars = () => {
 		userRankSetting.stars = max
 	} else {
 		if (parseInt(level as string) === 0) return
-		const [min3, _max3] = getStandardRound(parseInt(level as string) - 1)
+		const [_min3, max3] = getStandardRound(parseInt(level as string) - 1)
+		const [_min4, max4] = getStarRound(parseInt(level as string) - 1)
 		userRankSetting.level = parseInt(level as string) - 1
-		userRankSetting.standard = min3
-		userRankSetting.stars = max
+		userRankSetting.standard = max3
+		userRankSetting.stars = max4
 	}
 }
 
@@ -178,7 +179,7 @@ const updateUserRank = () => {
 				/>
 			</span>
 			<span class="tip">
-				<ExclamationCircleIcon class="icon" />
+				<QuestionMarkCircleIcon class="icon" />
 				<span class="text"
 					>信息在未连接服务器时先同步至本地，而后在连接服务器时将直接使用更新后的信息同步。</span
 				>
@@ -217,13 +218,5 @@ const updateUserRank = () => {
 
 .title {
 	@apply inline-block w-full font-bold text-sm select-none opacity-75;
-}
-
-.tip {
-	@apply w-full inline-flex gap-1 justify-center
-	text-sm font-bold text-slate-400;
-}
-.tip .icon {
-	@apply w-6 h-6;
 }
 </style>

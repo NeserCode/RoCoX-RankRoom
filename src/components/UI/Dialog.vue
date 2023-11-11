@@ -61,7 +61,8 @@ const isOpen = defineModel<boolean>("open")
 }
 .dialog-backdrop {
 	@apply fixed inset-0 bg-black dark:bg-white
-	bg-opacity-50 dark:bg-opacity-20 cursor-not-allowed;
+	backdrop-blur-sm
+	bg-opacity-20 dark:bg-opacity-20 cursor-not-allowed;
 }
 .dialog-panel {
 	@apply w-full max-w-lg px-6 py-4 overflow-hidden text-left
@@ -77,13 +78,16 @@ const isOpen = defineModel<boolean>("open")
 
 .dialog-details {
 	@apply flex flex-col
-	text-sm select-none;
+	text-sm font-normal select-none;
+	font-family: "SourceHanSerifCN";
 }
 .dialog-details .scrollable {
-	@apply mt-1 px-1.5 max-h-64
+	@apply flex flex-col justify-center px-6 max-h-80
 	border-gray-200 dark:border-gray-700 overflow-y-auto;
 }
 .dialog-title {
-	@apply flex items-center py-2 text-lg font-semibold leading-6 select-none;
+	@apply inline-flex items-center py-2
+	text-lg font-black leading-6 select-none;
+	font-family: "SourceHanSerifCN";
 }
 </style>

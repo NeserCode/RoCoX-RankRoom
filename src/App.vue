@@ -29,7 +29,7 @@ const socketState = reactive<SocketRenderState>({
 	connected: false,
 	io: undefined,
 })
-const { initSocket, useUsers, useRooms } = useSocket()
+const { initSocket, useUsers, useRooms, useRank } = useSocket()
 
 onMounted(() => {
 	const socket = initSocket()
@@ -47,7 +47,7 @@ onMounted(() => {
 })
 
 provide(SocketStateKey, socketState)
-provide(SocketEmiterFunctionKey, { useUsers, useRooms })
+provide(SocketEmiterFunctionKey, { useUsers, useRooms, useRank })
 </script>
 
 <template>
@@ -112,6 +112,18 @@ button.btn {
   focus:ring-2 focus:border-green-300 dark:focus:border-green-500 ring-green-300 dark:ring-green-500
   outline-none shadow-lg transition-all rounded select-none
 	disabled:opacity-60 disabled:cursor-not-allowed;
+}
+button.btn.danger {
+	@apply border-red-500 dark:border-red-600 bg-red-400 dark:bg-red-700
+	text-gray-100 dark:text-red-100;
+}
+
+.tip {
+	@apply w-full flex gap-1 justify-center
+	text-sm font-bold leading-6 text-slate-400;
+}
+.tip .icon {
+	@apply w-6 h-6 inline-flex justify-center items-center;
 }
 </style>
 
