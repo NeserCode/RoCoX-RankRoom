@@ -94,6 +94,8 @@ export const useSocket: () => IORenderFunction = () => {
 			socket.on("rooms:update", (roomData: IORoom[]) => {
 				nextTick(() => {
 					roomList.value = roomData
+					const roomNow = roomData.find((r) => r.id === room.value.id)
+					if (roomNow) room.value = roomNow
 				})
 			})
 			socket.on("rooms:success", (data) => {
@@ -116,7 +118,12 @@ export const useSocket: () => IORenderFunction = () => {
 			})
 
 			socket.on("rooms:join", (roomData: IORoom) => {
-				room.value = roomData
+				if (room.value.id === DefaultRoom.id) {
+					let u = roomData.users.find((u) => u.socketId === socketId.value)
+					if (u) {
+						room.value = roomData
+					} else return
+				}
 			})
 			socket.on("rooms:left", () => {
 				room.value = DefaultRoom
@@ -127,6 +134,17 @@ export const useSocket: () => IORenderFunction = () => {
 				toast.error("所在房间已被房主销毁，自动退出房间", {
 					theme: isDarkMode.value ? "dark" : "light",
 				})
+			})
+
+			// rank
+			socket.on("rank:ready", (data) => {
+				console.log(data)
+			})
+			socket.on("rank:count", (data) => {
+				console.log(data)
+			})
+			socket.on("rank:rank", (data) => {
+				console.log(data)
 			})
 
 			return socket
@@ -165,6 +183,12 @@ export const useSocket: () => IORenderFunction = () => {
 			return {
 				updateConfig: (config) => {
 					socket.emit("rank:config", config)
+				},
+				nextRound: () => {
+					socket.emit("rank:next-round")
+				},
+				announceReady: () => {
+					socket.emit("rank:ready")
 				},
 			}
 		},

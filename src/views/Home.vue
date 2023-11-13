@@ -21,10 +21,12 @@ import {
 
 import { SocketStateKey } from "../token"
 import { useConstants } from "../composables/useConstant"
-import type { UserInfo, IOMessage, SocketRenderState } from "../shared"
+import type { UserInfo, IOMessage, SocketRenderState, IORoom } from "../shared"
 
+const { NormalMessageType, DefaultRoom } = useConstants()
 const userList = useStorage<UserInfo[]>("rocox-user-list", [])
 const messageList = useStorage<IOMessage[]>("rocox-message-list", [])
+const room = useStorage<IORoom>("rocox-room", DefaultRoom)
 
 const socketState = inject<SocketRenderState>(SocketStateKey, {
 	id: "",
@@ -32,7 +34,6 @@ const socketState = inject<SocketRenderState>(SocketStateKey, {
 	io: undefined,
 })
 
-const { NormalMessageType } = useConstants()
 const isShowRank = useStorage("rocox-is-show-rank", false)
 const isOnlyShowImportant = useStorage("rocox-is-only-show-important", false)
 const sortedMessageList = computed(() => {
@@ -115,7 +116,10 @@ onActivated(() => {
 							>服务器人数 {{ userList.length }}</span
 						>
 						<span class="server-users" v-else>未连接服务器</span>
-						<span class="room-users"> 未加入房间 </span>
+						<span class="room-users" v-if="room.users.length">
+							房内人数 {{ room.users.length }}
+						</span>
+						<span class="room-users" v-else> 未加入房间 </span>
 					</span>
 					<span class="rank-visable">
 						<span class="text">段位显示</span>

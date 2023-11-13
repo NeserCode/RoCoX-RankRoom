@@ -60,10 +60,12 @@ export interface IORenderRoomFunction {
 
 export interface IORankFunction {
 	updateConfig: (config: IORankConfig) => void
+	nextRound: () => void
+	announceReady: () => void
 }
 
 export interface IORankConfig {
-	type: "RANK_NORMAL" | "RANK_BADGE" | "RANK_CUSTOM"
+	type: "RANK_NORMAL" | "RANK_SHIFT" | "RANK_BADGE" | "RANK_CUSTOM"
 	round: {
 		round: number
 		count: number

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import Dialog from "./UI/Dialog.vue"
-import { CubeIcon, QuestionMarkCircleIcon } from "@heroicons/vue/24/solid"
+import { CubeIcon } from "@heroicons/vue/24/solid"
 
 import { inject, reactive, ref } from "vue"
 import { SocketEmiterFunctionKey } from "../token"
@@ -11,6 +11,8 @@ const { useRank } = inject<{ useRank: () => IORankFunction }>(
 	{
 		useRank: () => ({
 			updateConfig: (_config: IORankConfig) => {},
+			nextRound: () => {},
+			announceReady: () => {},
 		}),
 	}
 )
@@ -28,8 +30,8 @@ const rankConfigData = reactive<IORankConfig>({
 	},
 })
 
+const { updateConfig, nextRound, announceReady } = useRank()
 const updateRankConfig = () => {
-	const { updateConfig } = useRank()
 	updateConfig(rankConfigData)
 
 	isShowRankConfig.value = false
@@ -41,18 +43,19 @@ const updateRankConfig = () => {
 		<form class="control-btns">
 			<button type="button" class="btn" @click="openRankConfig">
 				<CubeIcon class="icon" />
-				<span class="text">更新配置</span>
+				<span class="text">配置</span>
 			</button>
 			<button type="button" class="btn">开始</button>
-			<button type="button" class="btn">下一轮</button>
-			<button type="button" class="btn">发动准备</button>
+			<button type="button" class="btn" @click="nextRound">下一轮</button>
+			<button type="button" class="btn" @click="announceReady">发动准备</button>
 		</form>
 		<Dialog v-model:open="isShowRankConfig">
-			<template #title> 新建房间 </template>
+			<template #title> 发车配置 </template>
 			<template #info>
 				<form class="rank-update" @submit.prevent="updateRankConfig">
 					<select v-model="rankConfigData.type" autofocus>
 						<option value="RANK_NORMAL" selected>积分赛</option>
+						<option value="RANK_SHIFT">补分赛</option>
 						<option value="RANK_BADGE">徽章赛</option>
 						<option value="RANK_CUSTOM" disabled>自定义</option>
 					</select>
