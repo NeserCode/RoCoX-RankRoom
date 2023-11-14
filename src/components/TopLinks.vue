@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import SocketState from "./SocketState.vue"
+import RoomState from "./RoomState.vue"
 import {
 	UserGroupIcon,
 	QuestionMarkCircleIcon,
@@ -43,6 +44,7 @@ const socketState = inject(SocketStateKey, { id: "", connected: false })
 				:id="socketState.id"
 				:connected="socketState.connected"
 			/>
+			<RoomState class="room-status" />
 		</div>
 	</Transition>
 </template>
@@ -69,5 +71,8 @@ const socketState = inject(SocketStateKey, { id: "", connected: false })
 
 .links-status {
 	@apply absolute left-4 z-10;
+}
+.room-status {
+	@apply absolute right-4 z-10;
 }
 </style>

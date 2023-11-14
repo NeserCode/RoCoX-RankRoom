@@ -31,18 +31,6 @@ export interface UserInfo {
 	userRankPrefer?: "LEVEL" | "BADGE"
 }
 
-export interface IOMessageData {
-	user: UserInfo
-}
-
-export interface IOMessage {
-	data: IOMessageData
-	type: "JOIN_SERVER" | "LEFT_SERVER" | "USER_UPDATE"
-	io: { id: string }
-	state: IOState
-	t: number
-}
-
 export interface UserListItemProps extends UserInfo {
 	rankVisable: boolean
 }
@@ -64,14 +52,6 @@ export interface IORankFunction {
 	announceReady: () => void
 }
 
-export interface IORankConfig {
-	type: "RANK_NORMAL" | "RANK_SHIFT" | "RANK_BADGE" | "RANK_CUSTOM"
-	round: {
-		round: number
-		count: number
-	}
-}
-
 export interface IORenderFunction {
 	initSocket: () => Socket
 	useUsers: () => IORenderUserFunction
@@ -80,11 +60,27 @@ export interface IORenderFunction {
 }
 
 export type IORankState =
-	| "RANK_READY"
-	| "RANK_COUNTING"
-	| "RANK_RANKING"
-	| "RANK_FINISHED"
+	| "CONFIG"
+	| "READY"
+	| "COUNTING"
+	| "RANKING"
+	| "FINISHED"
 export type IORankBattleState = "BATTLE_SUCCESS" | "BATTLE_FAIL"
+export type IORankType =
+	| "RANK_NORMAL"
+	| "RANK_SHIFT"
+	| "RANK_BADGE"
+	| "RANK_CUSTOM"
+export interface IORankConfig {
+	type: IORankType
+	round: {
+		round: number
+		count: number
+	}
+}
+export interface IORankRuntime extends IORankConfig {
+	id: string
+}
 export interface IORankBattleDiff {
 	winStar: number
 	loseStar: number
@@ -98,6 +94,8 @@ export interface IORankBattle {
 }
 export interface IORank {
 	state: IORankState
+	config: IORankConfig
+	runtime: IORankRuntime
 	battles: IORankBattle[]
 }
 
@@ -110,11 +108,22 @@ export interface IORoom {
 	rank: IORank
 }
 
-export interface RoomMessage {
+export type IORoomMessageType = "ROOM_ERROR" | "ROOM_WARNING" | "ROOM_SUCCESS"
+export interface IORoomMessage {
 	roomId: string
-	type: "ROOM_ERROR" | "ROOM_WARNING" | "ROOM_SUCCESS"
+	type: IORoomMessageType
 	data: {
 		message?: string
 	}
+	t: number
+}
+
+export interface IOUserMessage {
+	data: {
+		user: UserInfo
+	}
+	type: "JOIN_SERVER" | "LEFT_SERVER" | "USER_UPDATE"
+	io: { id: string }
+	state: IOState
 	t: number
 }

@@ -1,8 +1,15 @@
-import { IORankBattle, UserInfo } from "../shared"
+import { IORankBattle, IORankState, UserInfo } from "../shared"
 
 export const useConstants = () => {
 	return {
 		NormalMessageType: ["JOIN_SERVER", "LEFT_SERVER", "USER_UPDATE"],
+		NormalRankFlowType: [
+			"CONFIG",
+			"READY",
+			"COUNTING",
+			"RANKING",
+			"FINISHED",
+		] as IORankState[],
 		TitleMapData: [
 			["", "Rocox Rank Room"],
 			["home", "房间"],
@@ -22,7 +29,22 @@ export const useConstants = () => {
 			password: "",
 			users: [] as UserInfo[],
 			rank: {
-				state: "RANK_READY" as "RANK_READY",
+				state: "CONFIG" as "CONFIG",
+				config: {
+					type: "RANK_NORMAL" as "RANK_NORMAL",
+					round: {
+						round: 10,
+						count: 5000,
+					},
+				},
+				runtime: {
+					id: "",
+					type: "RANK_NORMAL" as "RANK_NORMAL",
+					round: {
+						round: 10,
+						count: 5000,
+					},
+				},
 				battles: [] as IORankBattle[],
 			},
 		},

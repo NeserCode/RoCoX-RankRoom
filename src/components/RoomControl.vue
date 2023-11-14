@@ -60,7 +60,10 @@ const roomData = useStorage<IORoom>("rocox-room", DefaultRoom)
 const IOCreationKey = useStorage<string>("rocox-io-creation-key", "")
 
 const isJoinedRoom = computed(() => roomData.value.id !== "")
-const isHostRoom = computed(() => roomData.value.host === socketId.value)
+const isHostRoom = computed(() => {
+	if (socketId.value !== "") return roomData.value.host === socketId.value
+	else return false
+})
 
 const useFetchKey = async (hash: string): Promise<string> => {
 	const response = await fetch<string>(

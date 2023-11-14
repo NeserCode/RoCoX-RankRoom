@@ -10,7 +10,7 @@ const { isDarkMode } = useDarkMode()
 
 import type {
 	IORenderFunction,
-	IOMessage,
+	IOUserMessage,
 	UserRank,
 	UserInfo,
 	IORoom,
@@ -28,7 +28,7 @@ const serverAddress = `${
 const { DefaultUserRank, DefaultRoom } = useConstants()
 export const useSocket: () => IORenderFunction = () => {
 	const userList = useStorage<UserInfo[]>("rocox-user-list", [])
-	const messageList = useStorage<IOMessage[]>("rocox-message-list", [])
+	const messageList = useStorage<IOUserMessage[]>("rocox-message-list", [])
 	const socketId = useStorage<string>("rocox-socket-id", "")
 	const username = useStorage<string>("rocox-username", "")
 	const userRank = useStorage<UserRank>("rocox-user-rank", DefaultUserRank)
@@ -137,6 +137,9 @@ export const useSocket: () => IORenderFunction = () => {
 			})
 
 			// rank
+			socket.on("rank:update-config", (roomData: IORoom) => {
+				room.value = roomData
+			})
 			socket.on("rank:ready", (data) => {
 				console.log(data)
 			})

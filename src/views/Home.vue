@@ -21,11 +21,16 @@ import {
 
 import { SocketStateKey } from "../token"
 import { useConstants } from "../composables/useConstant"
-import type { UserInfo, IOMessage, SocketRenderState, IORoom } from "../shared"
+import type {
+	UserInfo,
+	IOUserMessage,
+	SocketRenderState,
+	IORoom,
+} from "../shared"
 
 const { NormalMessageType, DefaultRoom } = useConstants()
 const userList = useStorage<UserInfo[]>("rocox-user-list", [])
-const messageList = useStorage<IOMessage[]>("rocox-message-list", [])
+const messageList = useStorage<IOUserMessage[]>("rocox-message-list", [])
 const room = useStorage<IORoom>("rocox-room", DefaultRoom)
 
 const socketState = inject<SocketRenderState>(SocketStateKey, {

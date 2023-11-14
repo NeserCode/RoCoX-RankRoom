@@ -2,12 +2,12 @@
 import { useStorage } from "@vueuse/core"
 import { computed, onMounted, ref, toRefs } from "vue"
 
-import type { IOMessage, RoomMessage } from "../shared"
+import type { IOUserMessage, IORoomMessage } from "../shared"
 import { useConstants } from "../composables/useConstant"
 
 const $props = withDefaults(
 	defineProps<{
-		message: IOMessage | RoomMessage
+		message: IOUserMessage | IORoomMessage
 	}>(),
 	{}
 )
@@ -22,9 +22,9 @@ const messageText = computed(() => {
 
 	const socketId = useStorage("rocox-socket-id", "")
 	const name =
-		socketId.value === (message.value as IOMessage).io?.id!
+		socketId.value === (message.value as IOUserMessage).io?.id!
 			? "你"
-			: (message.value as IOMessage).data?.user?.username
+			: (message.value as IOUserMessage).data?.user?.username
 
 	switch (message.value.type) {
 		case "JOIN_SERVER": {
@@ -89,7 +89,7 @@ onMounted(() => {
 	</div>
 	<div :class="['message-list-item', message.type]" ref="el" v-else>
 		<span class="time">{{ getComputedTimeString(message.t) }}</span>
-		<span class="text">{{ (message as RoomMessage).data.message }} </span>
+		<span class="text">{{ (message as IORoomMessage).data.message }} </span>
 	</div>
 </template>
 

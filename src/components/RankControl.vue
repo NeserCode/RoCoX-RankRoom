@@ -2,9 +2,16 @@
 import Dialog from "./UI/Dialog.vue"
 import { CubeIcon } from "@heroicons/vue/24/solid"
 
-import { inject, reactive, ref } from "vue"
+import { computed, inject, reactive, ref } from "vue"
 import { SocketEmiterFunctionKey } from "../token"
-import type { IORankFunction, IORankConfig } from "../shared"
+import type {
+	IORankFunction,
+	IORankConfig,
+	IORankState,
+	IORoom,
+} from "../shared"
+import { useConstants } from "../composables/useConstant"
+import { useStorage } from "@vueuse/core"
 
 const { useRank } = inject<{ useRank: () => IORankFunction }>(
 	SocketEmiterFunctionKey,
@@ -16,6 +23,19 @@ const { useRank } = inject<{ useRank: () => IORankFunction }>(
 		}),
 	}
 )
+
+const { NormalRankFlowType, DefaultRoom } = useConstants()
+const room = useStorage<IORoom>("rocox-room", DefaultRoom)
+const socketId = useStorage<string>("rocox-socket-id", "")
+
+const isHostRoom = computed(() => socketId.value === room.value.host)
+
+const enableFromState = (state: IORankState) => {
+	return !(
+		NormalRankFlowType.findIndex((t) => t === room.value.rank.state) + 1 >=
+		NormalRankFlowType.findIndex((t) => t === state)
+	)
+}
 
 const isShowRankConfig = ref(false)
 const openRankConfig = () => {
@@ -40,14 +60,27 @@ const updateRankConfig = () => {
 
 <template>
 	<div class="rank-control">
-		<form class="control-btns">
+		<form class="control-btns" v-if="isHostRoom">
 			<button type="button" class="btn" @click="openRankConfig">
 				<CubeIcon class="icon" />
-				<span class="text">配置</span>
+				<span class="text" :disabled="enableFromState('CONFIG')">配置</span>
 			</button>
-			<button type="button" class="btn">开始</button>
-			<button type="button" class="btn" @click="nextRound">下一轮</button>
-			<button type="button" class="btn" @click="announceReady">发动准备</button>
+			<button
+				type="button"
+				class="btn"
+				@click="announceReady"
+				:disabled="enableFromState('READY')"
+			>
+				发动准备
+			</button>
+			<button
+				type="button"
+				class="btn"
+				@click="nextRound"
+				:disabled="enableFromState('COUNTING')"
+			>
+				开始发车轮计时
+			</button>
 		</form>
 		<Dialog v-model:open="isShowRankConfig">
 			<template #title> 发车配置 </template>
