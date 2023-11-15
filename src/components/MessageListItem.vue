@@ -57,30 +57,31 @@ const userMessageText = computed(() => {
 		}
 	}
 })
-const rankMessageText = computed(() => {
+const getRankMessageText = () => {
 	if (!isRankMessage.value) return
 	const rankTypeMap = new Map(RankTypeMapData)
 	const rankType = rankTypeMap.get((message.value as IORankMessage).config.type)
+	const { round } = (message.value as IORankMessage).runtime.round
+	const { round: totalRound, count } = (message.value as IORankMessage).config
+		.round
 	switch (message.value.type as IORankState) {
 		case "CONFIG": {
-			return `本房间内发车配置已更新为：${rankType}&${
-				(message.value as IORankMessage).config.round.round
-			}轮制&${(message.value as IORankMessage).config.round.count}毫秒计时。`
+			return `本房间内发车配置已更新为：${rankType}&${totalRound}轮制&${count}毫秒计时。`
 		}
 		case "READY": {
-			return `本轮发车已开始进入准备环节。`
+			return `第${round}轮发车已进入准备环节。`
 		}
 		case "COUNTING": {
-			return `即将开始本轮发车倒计时，请尽量于计时结束时开始匹配以继续发车进程。`
+			return `即将开始第${round}轮发车倒计时：${count}毫秒，请等待对战面板弹出以继续发车进程。`
 		}
 		case "RANKING": {
-			return `本轮发车倒计时结束，请匹配您的对手。`
+			return `第${round}轮发车倒计时结束，请匹配您的对手。`
 		}
 		case "FINISHED": {
 			return `本场发车活动已被管理确认为完成状态，感谢您的配合。`
 		}
 	}
-})
+}
 const getComputedTimeString = (t: number) => {
 	const now = new Date()
 	const diff = now.getTime() - t
@@ -144,7 +145,7 @@ onMounted(() => {
 		v-else-if="isRankMessage"
 	>
 		<span class="time">{{ getComputedTimeString(message.t) }}</span>
-		<span class="text">{{ rankMessageText }} </span>
+		<span class="text">{{ getRankMessageText() }} </span>
 	</div>
 </template>
 
@@ -200,8 +201,20 @@ onMounted(() => {
 	@apply -right-[7ch];
 	content: "Room";
 }
-.message-list-item.ROOM_ERROR:hover::after {
-	@apply opacity-100;
+.message-list-item.CONFIG::after,
+.message-list-item.READY::after,
+.message-list-item.COUNTING::after,
+.message-list-item.RANKING::after,
+.message-list-item.FINISHED::after {
+	@apply -right-[7ch];
+	content: "Rank";
+}
+.message-list-item.CONFIG,
+.message-list-item.READY,
+.message-list-item.COUNTING,
+.message-list-item.RANKING,
+.message-list-item.FINISHED {
+	@apply border-dashed;
 }
 
 .message-list-item.ROOM_SUCCESS {
@@ -215,5 +228,22 @@ onMounted(() => {
 .message-list-item.ROOM_ERROR {
 	@apply border-red-400 dark:border-red-500
 	bg-red-200 dark:bg-red-800;
+}
+
+.message-list-item.CONFIG {
+	@apply border-stone-400 dark:border-stone-500
+	bg-stone-200 dark:bg-stone-800;
+}
+.message-list-item.READY {
+	@apply border-emerald-400 dark:border-emerald-500
+	bg-emerald-200 dark:bg-emerald-800;
+}
+.message-list-item.COUNTING {
+	@apply border-sky-400 dark:border-sky-500
+	bg-sky-200 dark:bg-sky-800;
+}
+.message-list-item.RANKING {
+	@apply border-lime-400 dark:border-lime-500
+	bg-lime-200 dark:bg-lime-800;
 }
 </style>

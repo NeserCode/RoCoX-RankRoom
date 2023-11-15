@@ -120,10 +120,10 @@ button.btn.danger {
 
 .tip {
 	@apply w-full flex gap-1 justify-center
-	text-sm font-bold leading-6 text-slate-400;
+	text-sm font-bold text-slate-400;
 }
 .tip .icon {
-	@apply w-6 h-6 inline-flex justify-center items-center;
+	@apply w-5 h-5 inline-flex justify-center items-center;
 }
 </style>
 

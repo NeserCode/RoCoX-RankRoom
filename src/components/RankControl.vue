@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import Dialog from "./UI/Dialog.vue"
-import { CubeIcon } from "@heroicons/vue/24/solid"
+import RankPanel from "./RankPanel.vue"
+import { CubeIcon, ExclamationTriangleIcon } from "@heroicons/vue/24/solid"
 
 import { computed, inject, reactive, ref, watch } from "vue"
 import { SocketEmiterFunctionKey } from "../token"
@@ -29,6 +30,9 @@ const room = useStorage<IORoom>("rocox-room", DefaultRoom)
 const socketId = useStorage<string>("rocox-socket-id", "")
 
 const isHostRoom = computed(() => socketId.value === room.value.host)
+const isInRoom = computed(() =>
+	room.value.users.some((u) => u.socketId === socketId.value)
+)
 
 const enableFromState = (state: IORankState) => {
 	const has = (items: IORankState[]) => {
@@ -97,7 +101,7 @@ watch(
 				@click="announceReady"
 				:disabled="enableFromState('READY')"
 			>
-				发动准备
+				准备 · 第{{ room.rank.runtime.round.round + 1 }}轮
 			</button>
 			<button
 				type="button"
@@ -105,9 +109,10 @@ watch(
 				@click="nextRound"
 				:disabled="enableFromState('COUNTING')"
 			>
-				开始发车轮计时
+				发车倒计时 · {{ room.rank.config.round.count }}毫秒
 			</button>
 		</form>
+		<RankPanel v-if="isInRoom" />
 		<Dialog v-model:open="isShowRankConfig">
 			<template #title> 发车配置 </template>
 			<template #info>
@@ -140,6 +145,12 @@ watch(
 					/>
 					<button type="submit" class="btn">更新配置</button>
 				</form>
+				<span class="tip">
+					<ExclamationTriangleIcon class="icon" />
+					<span class="text"
+						>上传更新后的房间配置将会改动房间RankFlow，打断正在进行的流程。</span
+					>
+				</span>
 			</template>
 		</Dialog>
 	</div>
@@ -147,7 +158,7 @@ watch(
 
 <style lang="postcss" scoped>
 .rank-control {
-	@apply w-full inline-flex items-center px-2;
+	@apply w-full inline-flex items-center px-2 gap-2;
 }
 
 .control-btns {
@@ -158,9 +169,13 @@ watch(
 }
 
 .rank-update {
-	@apply inline-flex items-center mt-6 mb-2 gap-2;
+	@apply h-max inline-flex items-center mt-6 mb-2 p-2 gap-2;
 }
 .rank-update input {
 	@apply w-24;
+}
+
+.tip {
+	@apply mt-1;
 }
 </style>

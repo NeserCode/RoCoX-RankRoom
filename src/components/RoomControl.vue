@@ -141,6 +141,14 @@ const copyText = async (text: string) => {
 				v-model="roomInputs.roomId"
 				v-if="!isJoinedRoom"
 			/>
+			<button
+				class="btn danger"
+				v-if="isJoinedRoom"
+				type="button"
+				@click="leftIORoom"
+			>
+				退出房间
+			</button>
 			<input
 				type="password"
 				class="room-key"
@@ -156,14 +164,6 @@ const copyText = async (text: string) => {
 				value="加入"
 				v-if="!isJoinedRoom"
 			/>
-			<button
-				class="btn danger"
-				v-if="isJoinedRoom"
-				type="button"
-				@click="leftIORoom"
-			>
-				退出房间
-			</button>
 			<button class="btn danger" v-if="isHostRoom">销毁房间</button>
 			<button
 				type="button"
@@ -230,9 +230,9 @@ const copyText = async (text: string) => {
 				<table class="room-list" v-if="roomList.length">
 					<thead align="center">
 						<tr>
-							<th>房间名称</th>
-							<th>房间编号</th>
-							<th>房间人数</th>
+							<th>名称</th>
+							<th>编号</th>
+							<th>人数</th>
 						</tr>
 					</thead>
 					<tbody align="center">
@@ -307,5 +307,9 @@ form.room {
 }
 .room-row-id {
 	@apply cursor-pointer;
+}
+
+.tip {
+	@apply justify-start;
 }
 </style>

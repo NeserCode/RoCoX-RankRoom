@@ -29,6 +29,7 @@ export interface UserInfo {
 	username: string
 	userRank: StoragedUserRank
 	userRankPrefer?: "LEVEL" | "BADGE"
+	battles?: IORankBattle[]
 }
 
 export interface UserListItemProps extends UserInfo {

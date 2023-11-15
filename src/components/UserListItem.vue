@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { toRefs } from "vue"
 
-import type { UserListItemProps } from "../shared"
+import type { UserListItemProps, UserRank } from "../shared"
 
 const $props = withDefaults(defineProps<UserListItemProps>(), {
 	socketId: "",
@@ -59,7 +59,11 @@ const computedRank = (level: number, standard: number, star: number) => {
 	<div class="user-list-item">
 		<span class="username">{{ username === "" ? "无名客" : username }}</span>
 		<span class="rank" v-if="rankVisable">{{
-			computedRank(userRank.level as number, userRank.standard, userRank.stars)
+			computedRank(
+				(userRank as UserRank).level as number,
+				(userRank as UserRank).standard,
+				(userRank as UserRank).stars
+			)
 		}}</span>
 	</div>
 </template>
@@ -69,12 +73,13 @@ const computedRank = (level: number, standard: number, star: number) => {
 	@apply w-fit h-fit inline-flex justify-center items-center px-1 py-0.5 gap-0.5
 	rounded-md bg-white dark:bg-slate-600
 	border-2 box-content border-slate-300 dark:border-slate-500
-	text-sm font-semibold transition-all ease-in-out duration-300 overflow-hidden;
+	text-sm font-semibold transition-all ease-in-out duration-300 overflow-hidden
+	select-none;
 }
 
 .username {
-	@apply max-w-[10ch] inline-block pr-1 mr-1
-	truncate
+	@apply min-w-[3ch] max-w-[10ch] inline-block pr-1 mr-1
+	text-center truncate whitespace-pre
 	border-r-2 border-slate-300 dark:border-slate-500;
 }
 .username:last-child {

@@ -42,6 +42,11 @@ const socketState = inject<SocketRenderState>(SocketStateKey, {
 
 const isShowRank = useStorage("rocox-is-show-rank", false)
 const isOnlyShowImportant = useStorage("rocox-is-only-show-important", false)
+const sortedUserList = computed(() => {
+	if (room.value.users.some((u) => u.socketId === socketState.id))
+		return room.value.users
+	else return userList.value
+})
 const sortedMessageList = computed(() => {
 	if (isOnlyShowImportant.value)
 		return messageList.value.filter(
@@ -136,9 +141,9 @@ onActivated(() => {
 					</span>
 				</div>
 				<div class="user-list">
-					<template v-if="userList.length && socketState.connected">
+					<template v-if="sortedUserList.length && socketState.connected">
 						<UserListItem
-							v-for="user in userList"
+							v-for="user in sortedUserList"
 							:key="user.socketId"
 							:socket-id="user.socketId"
 							:username="user.username"
@@ -147,10 +152,10 @@ onActivated(() => {
 						/>
 					</template>
 					<Transition name="fade" mode="out-in" appear>
-						<template v-if="!userList.length || !socketState.connected">
+						<template v-if="!sortedUserList.length || !socketState.connected">
 							<div class="placeholder">
-								<SignalSlashIcon class="icon" />
-								<span class="text">请先连接至可用的服务器</span>
+								<CubeTransparentIcon class="icon" />
+								<span class="text">暂无玩家</span>
 							</div>
 						</template>
 					</Transition>
@@ -242,6 +247,6 @@ onActivated(() => {
 }
 
 .message-list {
-	@apply w-full h-full flex flex-col px-3 py-1.5;
+	@apply w-full h-fit flex flex-col px-3 py-1.5;
 }
 </style>
