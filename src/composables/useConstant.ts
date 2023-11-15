@@ -1,8 +1,24 @@
-import { IORankBattle, IORankState, UserInfo } from "../shared"
+import {
+	IORankBattle,
+	IORankState,
+	IORankType,
+	IORoomMessageType,
+	IOUserMessageType,
+	UserInfo,
+} from "../shared"
 
 export const useConstants = () => {
 	return {
-		NormalMessageType: ["JOIN_SERVER", "LEFT_SERVER", "USER_UPDATE"],
+		NormalUserMessageType: [
+			"JOIN_SERVER",
+			"LEFT_SERVER",
+			"USER_UPDATE",
+		] as IOUserMessageType[],
+		NormalRoomMessageType: [
+			"ROOM_ERROR",
+			"ROOM_WARNING",
+			"ROOM_SUCCESS",
+		] as IORoomMessageType[],
 		NormalRankFlowType: [
 			"CONFIG",
 			"READY",
@@ -15,7 +31,13 @@ export const useConstants = () => {
 			["home", "房间"],
 			["setting", "设置"],
 			["about", "关于"],
-		],
+		] as Iterable<[string, string]>,
+		RankTypeMapData: [
+			["RANK_NORMAL", "上分赛"],
+			["RANK_SHIFT", "补分赛"],
+			["RANK_BADGE", "徽章赛"],
+			["RANK_CUSTOM", "自定义"],
+		] as Iterable<[IORankType, string]>,
 
 		DefaultUserRank: {
 			level: 0,

@@ -2,10 +2,10 @@
 import Dialog from "./UI/Dialog.vue"
 import { CubeIcon } from "@heroicons/vue/24/solid"
 
-import { computed, inject, reactive, ref } from "vue"
+import { computed, inject, reactive, ref, watch } from "vue"
 import { SocketEmiterFunctionKey } from "../token"
 import type {
-	IORankFunction,
+	IORenderRankFunction,
 	IORankConfig,
 	IORankState,
 	IORoom,
@@ -13,7 +13,7 @@ import type {
 import { useConstants } from "../composables/useConstant"
 import { useStorage } from "@vueuse/core"
 
-const { useRank } = inject<{ useRank: () => IORankFunction }>(
+const { useRank } = inject<{ useRank: () => IORenderRankFunction }>(
 	SocketEmiterFunctionKey,
 	{
 		useRank: () => ({
@@ -24,17 +24,30 @@ const { useRank } = inject<{ useRank: () => IORankFunction }>(
 	}
 )
 
-const { NormalRankFlowType, DefaultRoom } = useConstants()
+const { DefaultRoom } = useConstants()
 const room = useStorage<IORoom>("rocox-room", DefaultRoom)
 const socketId = useStorage<string>("rocox-socket-id", "")
 
 const isHostRoom = computed(() => socketId.value === room.value.host)
 
 const enableFromState = (state: IORankState) => {
-	return !(
-		NormalRankFlowType.findIndex((t) => t === room.value.rank.state) + 1 >=
-		NormalRankFlowType.findIndex((t) => t === state)
-	)
+	const has = (items: IORankState[]) => {
+		return !items.includes(room.value.rank.state)
+	}
+
+	switch (state) {
+		case "CONFIG": {
+			return has(["CONFIG", "FINISHED"])
+		}
+		case "READY": {
+			return has(["CONFIG", "RANKING"])
+		}
+		case "COUNTING": {
+			return has(["READY"])
+		}
+		default:
+			break
+	}
 }
 
 const isShowRankConfig = ref(false)
@@ -56,6 +69,19 @@ const updateRankConfig = () => {
 
 	isShowRankConfig.value = false
 }
+
+watch(
+	() => room.value.rank,
+	() => {
+		rankConfigData.type = room.value.rank.config.type
+		rankConfigData.round.round = room.value.rank.config.round.round
+		rankConfigData.round.count = room.value.rank.config.round.count
+	},
+	{
+		immediate: true,
+		deep: true,
+	}
+)
 </script>
 
 <template>

@@ -10,10 +10,11 @@ const { isDarkMode } = useDarkMode()
 
 import type {
 	IORenderFunction,
-	IOUserMessage,
 	UserRank,
 	UserInfo,
 	IORoom,
+	IORankMessage,
+	IOMessage,
 } from "../shared"
 
 const ENV = import.meta.env
@@ -28,7 +29,7 @@ const serverAddress = `${
 const { DefaultUserRank, DefaultRoom } = useConstants()
 export const useSocket: () => IORenderFunction = () => {
 	const userList = useStorage<UserInfo[]>("rocox-user-list", [])
-	const messageList = useStorage<IOUserMessage[]>("rocox-message-list", [])
+	const messageList = useStorage<IOMessage[]>("rocox-message-list", [])
 	const socketId = useStorage<string>("rocox-socket-id", "")
 	const username = useStorage<string>("rocox-username", "")
 	const userRank = useStorage<UserRank>("rocox-user-rank", DefaultUserRank)
@@ -99,19 +100,16 @@ export const useSocket: () => IORenderFunction = () => {
 				})
 			})
 			socket.on("rooms:success", (data) => {
-				console.log(data)
 				toast.success(data.data.message, {
 					theme: isDarkMode.value ? "dark" : "light",
 				})
 			})
 			socket.on("rooms:error", (data) => {
-				console.log(data)
 				toast.error(data.data.message, {
 					theme: isDarkMode.value ? "dark" : "light",
 				})
 			})
 			socket.on("rooms:warning", (data) => {
-				console.log(data)
 				toast.warning(data.data.message, {
 					theme: isDarkMode.value ? "dark" : "light",
 				})
@@ -140,14 +138,24 @@ export const useSocket: () => IORenderFunction = () => {
 			socket.on("rank:update-config", (roomData: IORoom) => {
 				room.value = roomData
 			})
-			socket.on("rank:ready", (data) => {
+			socket.on("rank:ready", (data: IORankMessage) => {
+				room.value.rank.state = "READY"
+				room.value.rank.runtime = data.runtime
 				console.log(data)
 			})
-			socket.on("rank:count", (data) => {
+			socket.on("rank:count", (data: IORankMessage) => {
+				room.value.rank.state = "COUNTING"
+				room.value.rank.runtime = data.runtime
 				console.log(data)
 			})
-			socket.on("rank:rank", (data) => {
+			socket.on("rank:rank", (data: IORankMessage) => {
+				room.value.rank.state = "RANKING"
+				room.value.rank.runtime = data.runtime
 				console.log(data)
+			})
+
+			socket.onAny((args) => {
+				console.log(args)
 			})
 
 			return socket

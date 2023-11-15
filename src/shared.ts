@@ -46,7 +46,7 @@ export interface IORenderRoomFunction {
 	destoryRoom: (id: string, password: string) => void
 }
 
-export interface IORankFunction {
+export interface IORenderRankFunction {
 	updateConfig: (config: IORankConfig) => void
 	nextRound: () => void
 	announceReady: () => void
@@ -56,7 +56,7 @@ export interface IORenderFunction {
 	initSocket: () => Socket
 	useUsers: () => IORenderUserFunction
 	useRooms: () => IORenderRoomFunction
-	useRank: () => IORankFunction
+	useRank: () => IORenderRankFunction
 }
 
 export type IORankState =
@@ -98,6 +98,13 @@ export interface IORank {
 	runtime: IORankRuntime
 	battles: IORankBattle[]
 }
+export interface IORankMessage {
+	type: IORankState
+	roomId: string
+	config: IORankConfig
+	runtime: IORankRuntime
+	t: number
+}
 
 export interface IORoom {
 	id: string
@@ -118,12 +125,15 @@ export interface IORoomMessage {
 	t: number
 }
 
+export type IOUserMessageType = "JOIN_SERVER" | "LEFT_SERVER" | "USER_UPDATE"
 export interface IOUserMessage {
 	data: {
 		user: UserInfo
 	}
-	type: "JOIN_SERVER" | "LEFT_SERVER" | "USER_UPDATE"
+	type: IOUserMessageType
 	io: { id: string }
 	state: IOState
 	t: number
 }
+
+export type IOMessage = IOUserMessage | IORoomMessage | IORankMessage

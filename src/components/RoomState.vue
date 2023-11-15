@@ -54,7 +54,7 @@ const enableIconfromState = (state: IORankState) => {
 
 <style lang="postcss" scoped>
 #room-state {
-	@apply flex flex-col justify-center items-center px-2 py-1
+	@apply flex flex-col justify-center px-2 py-1
 	border-2 rounded border-slate-200 dark:border-slate-500
 	bg-slate-100 dark:bg-slate-600
   font-black text-sm
@@ -62,7 +62,7 @@ const enableIconfromState = (state: IORankState) => {
 }
 
 .room-info {
-	@apply inline-flex items-center gap-0.5;
+	@apply inline-flex items-baseline gap-0.5;
 }
 .room-info .name {
 	@apply inline-block max-w-[12ch]

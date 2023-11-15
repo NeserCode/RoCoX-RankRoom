@@ -29,7 +29,7 @@ const $route = useRoute()
 const { TitleMapData } = useConstants()
 
 const title = ref("Rocox Rank Room")
-const titleMap = new Map(TitleMapData as Iterable<[string, string]>)
+const titleMap = new Map(TitleMapData)
 const isAlwaysonTop = useStorage("rocox-always-on-top", false)
 
 function updateTitle() {

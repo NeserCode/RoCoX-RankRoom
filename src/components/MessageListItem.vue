@@ -2,22 +2,41 @@
 import { useStorage } from "@vueuse/core"
 import { computed, onMounted, ref, toRefs } from "vue"
 
-import type { IOUserMessage, IORoomMessage } from "../shared"
+import type {
+	IOUserMessage,
+	IORoomMessage,
+	IOMessage,
+	IOUserMessageType,
+	IORoomMessageType,
+	IORankState,
+	IORankMessage,
+} from "../shared"
 import { useConstants } from "../composables/useConstant"
 
 const $props = withDefaults(
 	defineProps<{
-		message: IOUserMessage | IORoomMessage
+		message: IOMessage
 	}>(),
 	{}
 )
 const { message } = toRefs($props)
-const { NormalMessageType } = useConstants()
+const {
+	NormalUserMessageType,
+	NormalRoomMessageType,
+	NormalRankFlowType,
+	RankTypeMapData,
+} = useConstants()
 const isNormalMessage = computed(() =>
-	NormalMessageType.includes(message.value.type)
+	NormalUserMessageType.includes(message.value.type as IOUserMessageType)
+)
+const isRoomMessage = computed(() =>
+	NormalRoomMessageType.includes(message.value.type as IORoomMessageType)
+)
+const isRankMessage = computed(() =>
+	NormalRankFlowType.includes(message.value.type as IORankState)
 )
 
-const messageText = computed(() => {
+const userMessageText = computed(() => {
 	if (!isNormalMessage.value) return
 
 	const socketId = useStorage("rocox-socket-id", "")
@@ -35,6 +54,30 @@ const messageText = computed(() => {
 		}
 		case "USER_UPDATE": {
 			return `${name} 更新了个人信息。`
+		}
+	}
+})
+const rankMessageText = computed(() => {
+	if (!isRankMessage.value) return
+	const rankTypeMap = new Map(RankTypeMapData)
+	const rankType = rankTypeMap.get((message.value as IORankMessage).config.type)
+	switch (message.value.type as IORankState) {
+		case "CONFIG": {
+			return `本房间内发车配置已更新为：${rankType}&${
+				(message.value as IORankMessage).config.round.round
+			}轮制&${(message.value as IORankMessage).config.round.count}毫秒计时。`
+		}
+		case "READY": {
+			return `本轮发车已开始进入准备环节。`
+		}
+		case "COUNTING": {
+			return `即将开始本轮发车倒计时，请尽量于计时结束时开始匹配以继续发车进程。`
+		}
+		case "RANKING": {
+			return `本轮发车倒计时结束，请匹配您的对手。`
+		}
+		case "FINISHED": {
+			return `本场发车活动已被管理确认为完成状态，感谢您的配合。`
 		}
 	}
 })
@@ -85,11 +128,23 @@ onMounted(() => {
 		v-if="isNormalMessage"
 	>
 		<span class="time">{{ getComputedTimeString(message.t) }}</span>
-		<span class="text">{{ messageText }}</span>
+		<span class="text">{{ userMessageText }}</span>
 	</div>
-	<div :class="['message-list-item', message.type]" ref="el" v-else>
+	<div
+		:class="['message-list-item', message.type]"
+		ref="el"
+		v-else-if="isRoomMessage"
+	>
 		<span class="time">{{ getComputedTimeString(message.t) }}</span>
 		<span class="text">{{ (message as IORoomMessage).data.message }} </span>
+	</div>
+	<div
+		:class="['message-list-item', message.type]"
+		ref="el"
+		v-else-if="isRankMessage"
+	>
+		<span class="time">{{ getComputedTimeString(message.t) }}</span>
+		<span class="text">{{ rankMessageText }} </span>
 	</div>
 </template>
 

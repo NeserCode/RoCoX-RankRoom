@@ -23,14 +23,15 @@ import { SocketStateKey } from "../token"
 import { useConstants } from "../composables/useConstant"
 import type {
 	UserInfo,
-	IOUserMessage,
 	SocketRenderState,
 	IORoom,
+	IOMessage,
+	IOUserMessageType,
 } from "../shared"
 
-const { NormalMessageType, DefaultRoom } = useConstants()
+const { NormalUserMessageType, DefaultRoom } = useConstants()
 const userList = useStorage<UserInfo[]>("rocox-user-list", [])
-const messageList = useStorage<IOUserMessage[]>("rocox-message-list", [])
+const messageList = useStorage<IOMessage[]>("rocox-message-list", [])
 const room = useStorage<IORoom>("rocox-room", DefaultRoom)
 
 const socketState = inject<SocketRenderState>(SocketStateKey, {
@@ -44,7 +45,7 @@ const isOnlyShowImportant = useStorage("rocox-is-only-show-important", false)
 const sortedMessageList = computed(() => {
 	if (isOnlyShowImportant.value)
 		return messageList.value.filter(
-			(msg) => !NormalMessageType.includes(msg.type)
+			(msg) => !NormalUserMessageType.includes(msg.type as IOUserMessageType)
 		)
 	return messageList.value
 })
