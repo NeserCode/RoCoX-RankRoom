@@ -1,7 +1,7 @@
 <script lang="ts" setup>
+import { CubeIcon, ExclamationTriangleIcon } from "@heroicons/vue/24/solid"
 import Dialog from "./UI/Dialog.vue"
 import RankPanel from "./RankPanel.vue"
-import { CubeIcon, ExclamationTriangleIcon } from "@heroicons/vue/24/solid"
 
 import { computed, inject, reactive, ref, watch } from "vue"
 import { SocketEmiterFunctionKey } from "../token"

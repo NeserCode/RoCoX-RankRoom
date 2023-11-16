@@ -63,7 +63,7 @@ export const useConstants = () => {
 					id: "",
 					type: "RANK_NORMAL" as "RANK_NORMAL",
 					round: {
-						round: 10,
+						round: 0,
 						count: 5000,
 					},
 				},

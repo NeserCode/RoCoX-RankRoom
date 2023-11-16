@@ -11,7 +11,7 @@ import { CheckIcon, ChevronUpDownIcon } from "@heroicons/vue/20/solid"
 
 import { ref, computed } from "vue"
 
-import type { IORoom, UserRank } from "../../shared"
+import type { IORoom, UserInfo, UserRank } from "../../shared"
 import { useStorage } from "@vueuse/core"
 import { useConstants } from "../../composables/useConstant"
 
@@ -19,21 +19,36 @@ const { DefaultRoom } = useConstants()
 const room = useStorage<IORoom>("rocox-room", DefaultRoom)
 const socketId = useStorage<string>("rocox-socket-id", "")
 
+const passerby: UserInfo = {
+	socketId: "id-for-passerby",
+	username: "路人",
+	userRank: {
+		level: 5,
+		standard: 0,
+		stars: 999,
+	},
+}
 const sortedUsers = computed(() => {
 	return room.value.users.filter((u) => u.socketId !== socketId.value)
 })
-const selectedUser = ref(sortedUsers.value[0])
+const selectedUser = useStorage("rocox-rank-selected-user", passerby)
 const query = ref("")
-
-let filteredUsers = computed(() => {
+const filteredUsers = computed(() => {
 	return query.value === ""
 		? sortedUsers.value
 		: sortedUsers.value.filter((user) =>
 				user.username.toLowerCase().includes(query.value.toLowerCase())
 		  )
 })
+
 // @ts-ignore
-const displayValue = (user) => user.username
+const displayValue = (user) => {
+	if (user.username !== passerby.username)
+		return `${user.username} ${computedRank(
+			JSON.parse(user.userRank as string)
+		)}`
+	else return user.username
+}
 const changeInput = (e: any) => {
 	query.value = e.target!.value
 }
@@ -104,7 +119,7 @@ const computedRank = (rankData: UserRank) => {
 						v-if="filteredUsers.length === 0"
 						class="combox-option-placeholder"
 					>
-						Nothing found.
+						<span class="nothing-tip">没有检索到以上关键词</span>
 					</div>
 
 					<ComboboxOption
@@ -136,6 +151,33 @@ const computedRank = (rankData: UserRank) => {
 							</span>
 						</li>
 					</ComboboxOption>
+					<ComboboxOption
+						as="template"
+						:value="passerby"
+						v-slot="{ selected, active }"
+					>
+						<li
+							class="combox-option"
+							:class="{
+								'bg-teal-600 text-white': active,
+								'text-opacity-100': !active,
+							}"
+						>
+							<span class="user-info">
+								<span class="username">{{ passerby.username }}</span>
+								<span class="user-rank">{{
+									computedRank(passerby.userRank as UserRank)
+								}}</span>
+							</span>
+							<span
+								v-if="selected"
+								class="absolute inset-y-0 left-0 flex items-center pl-3"
+								:class="{ 'text-white': active, 'text-teal-600': !active }"
+							>
+								<CheckIcon class="w-5 h-5" aria-hidden="true" />
+							</span>
+						</li>
+					</ComboboxOption>
 				</ComboboxOptions>
 			</TransitionRoot>
 		</div>
@@ -144,27 +186,30 @@ const computedRank = (rankData: UserRank) => {
 
 <style lang="postcss">
 .combox-main {
-	@apply relative w-full inline-flex flex-col justify-center items-center mt-1;
+	@apply relative w-full inline-flex flex-col justify-center items-center my-4;
 }
 .combox-input-wrapper {
-	@apply relative w-48
+	@apply relative w-60
   cursor-default;
 }
 
 .combox-input {
-	@apply w-48 py-2 text-sm;
+	@apply w-60 text-sm z-10;
 }
 
 .combox-btn {
-	@apply absolute inset-y-0 right-0 flex items-center pr-2;
+	@apply absolute inset-y-0 -right-10 flex items-center px-1
+	border-2 rounded border-gray-300 dark:border-gray-500 caret-slate-400
+  bg-slate-100 dark:bg-slate-600;
 }
 .combox-btn .icon {
 	@apply w-5 h-5 text-gray-400;
 }
 
 .combox-options {
-	@apply absolute w-48 max-h-48 py-1 mt-1 left-1/2
-  font-extrabold text-sm bg-white
+	@apply absolute w-60 max-h-48 py-1 mt-1 left-1/2
+  font-extrabold text-sm
+	bg-white dark:bg-slate-700
   shadow-lg
   ring-1 ring-black/5 outline-none overflow-auto
   transition-all ease-in-out duration-300 -translate-x-1/2;
@@ -175,15 +220,19 @@ const computedRank = (rankData: UserRank) => {
 }
 
 .combox-option-placeholder {
-	@apply relative px-4 py-2
-  text-gray-700
+	@apply relative
   cursor-default select-none;
+}
+.combox-option-placeholder .nothing-tip {
+	@apply inline-flex items-center p-2
+	text-xs opacity-60;
 }
 </style>
 
 <style lang="postcss" scoped>
 .user-info {
-	@apply inline-flex flex-col justify-center;
+	@apply inline-flex flex-col justify-center
+	text-slate-700 dark:text-slate-300;
 }
 .user-info .username {
 	@apply text-base;
