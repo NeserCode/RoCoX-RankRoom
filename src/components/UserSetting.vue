@@ -5,10 +5,13 @@ import { useStorage } from "@vueuse/core"
 import { computed, inject, reactive, ref } from "vue"
 
 import { useConstants } from "../composables/useConstant"
+import { useRankLimit } from "../composables/useRankLimit"
+import { useRankActions } from "../composables/useRankAction"
 import { SocketEmiterFunctionKey } from "../token"
 import type { UserRank, IORenderUserFunction } from "../shared"
 
 const { DefaultUserRank } = useConstants()
+const { getStandardRound, getStarRound } = useRankLimit()
 
 const socketId = useStorage<string>("rocox-socket-id", "")
 const username = useStorage<string>("rocox-username", "")
@@ -20,6 +23,7 @@ const userRankSetting = reactive<UserRank>({
 	stars: userRank.value.stars,
 })
 const usernameSetting = ref(username.value)
+const { plusStars, minusStars } = useRankActions(userRankSetting)
 
 const isSame = computed(() => {
 	if (usernameSetting.value === username.value)
@@ -28,81 +32,6 @@ const isSame = computed(() => {
 				if (userRankSetting.stars === userRank.value.stars) return true
 	return false
 })
-
-const getStandardRound = (level: string | number) => {
-	switch (parseInt(level as string)) {
-		case 0:
-			return [1, 3]
-		case 1:
-			return [1, 3]
-		case 2:
-			return [1, 4]
-		case 3:
-			return [1, 4]
-		case 4:
-			return [1, 5]
-		case 5:
-			return [0, 0]
-		default:
-			return [0, 0]
-	}
-}
-const getStarRound = (level: string | number) => {
-	switch (parseInt(level as string)) {
-		case 0:
-			return [0, 3]
-		case 1:
-			return [0, 3]
-		case 2:
-			return [0, 3]
-		case 3:
-			return [0, 4]
-		case 4:
-			return [0, 4]
-		case 5:
-			return [0, 999]
-		default:
-			return [0, 0]
-	}
-}
-const plusStars = () => {
-	const { level, standard, stars } = userRankSetting
-	const [min, max] = getStarRound(level)
-	const [min2, max2] = getStandardRound(level)
-
-	if (stars > max || stars < min || standard > max2 || standard < min2) return
-
-	if (stars + 1 <= max) userRankSetting.stars = stars + 1
-	else if (standard + 1 <= max2) {
-		userRankSetting.standard = standard + 1
-		userRankSetting.stars = 0
-	} else {
-		if (parseInt(level as string) === 5) return
-		const [min3, _max3] = getStandardRound(parseInt(level as string) + 1)
-		userRankSetting.level = parseInt(level as string) + 1
-		userRankSetting.standard = min3
-		userRankSetting.stars = 0
-	}
-}
-const minusStars = () => {
-	const { level, standard, stars } = userRankSetting
-	const [min, max] = getStarRound(level)
-	const [min2, max2] = getStandardRound(level)
-
-	if (stars < min || stars > max || standard < min2 || standard > max2) return
-	if (stars - 1 >= min) userRankSetting.stars = stars - 1
-	else if (standard - 1 >= min2) {
-		userRankSetting.standard = standard - 1
-		userRankSetting.stars = max
-	} else {
-		if (parseInt(level as string) === 0) return
-		const [_min3, max3] = getStandardRound(parseInt(level as string) - 1)
-		const [_min4, max4] = getStarRound(parseInt(level as string) - 1)
-		userRankSetting.level = parseInt(level as string) - 1
-		userRankSetting.standard = max3
-		userRankSetting.stars = max4
-	}
-}
 
 const { useUsers } = inject<{ useUsers: () => IORenderUserFunction }>(
 	SocketEmiterFunctionKey,
