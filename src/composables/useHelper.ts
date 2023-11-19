@@ -1,9 +1,12 @@
 import { useRankLimit } from "./useRankLimit"
-import type { UserRank } from "../shared"
+import type { IORankBattle, UserInfo, UserRank } from "../shared"
 
 export const useHelpers = () => {
 	const { getStandardRound, getStarRound } = useRankLimit()
 
+	const checkIsBattleWon = (battle: IORankBattle, user: UserInfo) => {
+		return battle.winer?.socketId === user.socketId
+	}
 	return {
 		translateRankStars: (rank: UserRank) => {
 			let result = 0
@@ -35,6 +38,40 @@ export const useHelpers = () => {
 			return {
 				stars: result,
 				hasShell: rank.stars === 0,
+			}
+		},
+		compareRank: (a: UserRank, b: UserRank) => {
+			const aRank = useHelpers().translateRankStars(a)
+			const bRank = useHelpers().translateRankStars(b)
+
+			if (aRank.stars === bRank.stars) {
+				if (aRank.hasShell && !bRank.hasShell) return 1
+				if (!aRank.hasShell && bRank.hasShell) return -1
+				return 0
+			}
+
+			return aRank.stars - bRank.stars
+		},
+		generateRankCase: (user: UserInfo) => {
+			let wins = 0
+			let losses = 0
+			let counter = 1
+			let bs = user.battles!
+			if (!bs || bs.length < 1) return
+			while (checkIsBattleWon(bs[bs.length - counter], user)) {
+				wins++
+				counter++
+				if (bs.length - counter < 0) {
+					counter = 1
+					break
+				}
+			}
+			if (wins !== 0) return { wins, losses }
+
+			while (!checkIsBattleWon(bs[bs.length - counter], user)) {
+				losses++
+				counter++
+				if (bs.length - counter < 0) break
 			}
 		},
 	}

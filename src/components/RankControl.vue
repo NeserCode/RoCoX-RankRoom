@@ -21,6 +21,9 @@ const { useRank } = inject<{ useRank: () => IORenderRankFunction }>(
 			updateConfig: (_config: IORankConfig) => {},
 			nextRound: () => {},
 			announceReady: () => {},
+			announceFinish: () => {},
+			battleEmit: () => {},
+			battleReply: () => {},
 		}),
 	}
 )

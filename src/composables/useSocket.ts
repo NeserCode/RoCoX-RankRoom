@@ -15,6 +15,8 @@ import type {
 	IORoom,
 	IORankMessage,
 	IOMessage,
+	IORankBattle,
+	UserRankPreferType,
 } from "../shared"
 
 const ENV = import.meta.env
@@ -26,18 +28,25 @@ const serverAddress = `${
 	parseInt(ENV.SOCKET_SECURE) ? "wss" : "ws"
 }://${serverDomain}:${serverPort}`
 
-const { DefaultUserRank, DefaultRoom } = useConstants()
+const { DefaultUserRank, DefaultRoom, DefaultUser } = useConstants()
 export const useSocket: () => IORenderFunction = () => {
 	const userList = useStorage<UserInfo[]>("rocox-user-list", [])
 	const messageList = useStorage<IOMessage[]>("rocox-message-list", [])
 	const socketId = useStorage<string>("rocox-socket-id", "")
 	const username = useStorage<string>("rocox-username", "")
 	const userRank = useStorage<UserRank>("rocox-user-rank", DefaultUserRank)
+	const userBattle = useStorage<IORankBattle[]>("rocox-user-rank", [])
+	const userRankPrefer = useStorage<UserRankPreferType>(
+		"rocox-user-rank-prefer",
+		"LEVEL"
+	)
 	const room = useStorage<IORoom>("rocox-room", DefaultRoom)
 	const roomList = useStorage<IORoom[]>("rocox-room-list", [])
 	const IOCreationKey = useStorage<string>("rocox-io-creation-key", "")
-
 	const socketDelay = useStorage<number>("rocox-socket-delay", -1)
+
+	const selectedUser = useStorage("rocox-rank-selected-user", DefaultUser)
+	const battleUser = useStorage<UserInfo>("rocox-battle-user", DefaultUser)
 
 	if (username.value === "") username.value = "无名客"
 
@@ -141,18 +150,30 @@ export const useSocket: () => IORenderFunction = () => {
 			socket.on("rank:ready", (data: IORankMessage) => {
 				room.value.rank.state = "READY"
 				room.value.rank.runtime = data.runtime
-				console.log(data)
 			})
 			socket.on("rank:count", (data: IORankMessage) => {
 				room.value.rank.state = "COUNTING"
 				room.value.rank.runtime = data.runtime
-				console.log(data)
 			})
 			socket.on("rank:rank", (data: IORankMessage) => {
 				room.value.rank.state = "RANKING"
 				room.value.rank.runtime = data.runtime
-				console.log(data)
 			})
+
+			socket.on(
+				"rank:battle-emit",
+				(data: { self: UserInfo; opponent: UserInfo }) => {
+					if (socketId.value === data.opponent.socketId)
+						battleUser.value = data.self
+				}
+			)
+			socket.on(
+				"rank:battle-reply",
+				(data: { self: UserInfo; opponent: UserInfo }) => {
+					if (data.opponent.socketId === socketId.value)
+						battleUser.value = data.self
+				}
+			)
 
 			socket.onAny((args) => {
 				console.log(args)
@@ -198,8 +219,35 @@ export const useSocket: () => IORenderFunction = () => {
 				nextRound: () => {
 					socket.emit("rank:next-round")
 				},
+				battleEmit: () => {
+					socket.emit("rank:battle-emit", {
+						self: {
+							username: username.value,
+							userRank: userRank.value,
+							userRankPrefer: userRankPrefer.value,
+							socketId: socketId.value,
+							battles: userBattle.value,
+						},
+						opponent: selectedUser.value,
+					})
+				},
+				battleReply: () => {
+					socket.emit("rank:battle-reply", {
+						self: {
+							username: username.value,
+							userRank: userRank.value,
+							userRankPrefer: userRankPrefer.value,
+							socketId: socketId.value,
+							battles: userBattle.value,
+						},
+						opponent: selectedUser.value,
+					})
+				},
 				announceReady: () => {
 					socket.emit("rank:ready")
+				},
+				announceFinish: () => {
+					socket.emit("rank:finished")
 				},
 			}
 		},

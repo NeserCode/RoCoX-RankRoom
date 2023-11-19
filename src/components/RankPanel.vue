@@ -8,17 +8,28 @@ import {
 } from "@heroicons/vue/24/solid"
 import Dialog from "./UI/Dialog.vue"
 import Combox from "./UI/Combox.vue"
-import RankHelper from "./RankHelper.vue"
+// import RankHelper from "./RankHelper.vue"
 
-import { ref, watch } from "vue"
+import { computed, inject, ref, watch } from "vue"
 import { useStorage } from "@vueuse/core"
 
 import { useConstants } from "../composables/useConstant"
-import type { IORankState, IORoom } from "../shared"
+import { rawDatatoObject, computedRanktoText } from "../composables/utils"
 
-const { DefaultRoom, RankTypeMapData } = useConstants()
+import type {
+	IORankConfig,
+	IORankState,
+	IORenderRankFunction,
+	IORoom,
+	UserInfo,
+} from "../shared"
+import { SocketEmiterFunctionKey } from "../token"
+
+const { DefaultRoom, RankTypeMapData, DefaultUser } = useConstants()
 const RankTypeMap = new Map(RankTypeMapData)
 const room = useStorage<IORoom>("rocox-room", DefaultRoom)
+const battleUser = useStorage<UserInfo>("rocox-battle-user", DefaultUser)
+const selectedUser = useStorage("rocox-rank-selected-user", DefaultUser)
 
 const isShowRankPanel = ref(false)
 const openRankPanel = () => {
@@ -39,11 +50,47 @@ const startCounting = () => {
 watch(
 	() => room.value.rank.state,
 	(v) => {
+		if (v === "READY") {
+			battleUser.value = DefaultUser
+			selectedUser.value = DefaultUser
+		}
 		if (v === "RANKING") openRankPanel()
 		if (v === "COUNTING") startCounting()
 	},
 	{ immediate: true }
 )
+
+const { useRank } = inject<{ useRank: () => IORenderRankFunction }>(
+	SocketEmiterFunctionKey,
+	{
+		useRank: () => ({
+			updateConfig: (_config: IORankConfig) => {},
+			nextRound: () => {},
+			announceReady: () => {},
+			announceFinish: () => {},
+			battleEmit: () => {},
+			battleReply: () => {},
+		}),
+	}
+)
+const { battleEmit, battleReply } = useRank()
+const isMatchedRanker = computed(() => {
+	if (battleUser.value.socketId === DefaultUser.socketId) return false
+	else {
+		selectedUser.value = battleUser.value
+		return true
+	}
+})
+const isExceptPasserby = computed(() => {
+	return !(battleUser.value.socketId === DefaultUser.socketId)
+})
+const emitOwnasRanker = () => {
+	if (selectedUser.value.socketId !== DefaultUser.socketId) battleEmit()
+}
+const replyOwnasRanker = () => {
+	selectedUser.value = battleUser.value
+	battleReply()
+}
 </script>
 
 <template>
@@ -98,7 +145,22 @@ watch(
 					</div>
 					<div class="ranking-panel" v-else-if="rankState('RANKING')">
 						<Combox />
-						<RankHelper />
+						<!-- <RankHelper /> -->
+						<button type="button" class="btn" @click="emitOwnasRanker">
+							确认对手
+						</button>
+						<button
+							type="button"
+							class="btn"
+							@click="replyOwnasRanker"
+							v-if="isExceptPasserby"
+						>
+							应答 {{ battleUser.username }}
+							{{ computedRanktoText(rawDatatoObject(battleUser.userRank)) }}
+						</button>
+						<div class="rank-actions" v-if="isMatchedRanker">
+							<button type="button" class="btn"></button>
+						</div>
 					</div>
 				</div>
 			</template>
@@ -137,6 +199,6 @@ watch(
 }
 
 .ranking-panel {
-	@apply min-h-[12rem];
+	@apply relative flex flex-col items-center justify-center min-h-[12rem] gap-2;
 }
 </style>

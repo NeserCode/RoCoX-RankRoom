@@ -14,6 +14,7 @@ import { ref, computed } from "vue"
 import type { IORoom, UserInfo, UserRank } from "../../shared"
 import { useStorage } from "@vueuse/core"
 import { useConstants } from "../../composables/useConstant"
+import { rawDatatoObject } from "../../composables/utils"
 
 const { DefaultRoom } = useConstants()
 const room = useStorage<IORoom>("rocox-room", DefaultRoom)
@@ -44,9 +45,7 @@ const filteredUsers = computed(() => {
 // @ts-ignore
 const displayValue = (user) => {
 	if (user.username !== passerby.username)
-		return `${user.username} ${computedRank(
-			JSON.parse(user.userRank as string)
-		)}`
+		return `${user.username} ${computedRank(rawDatatoObject(user.userRank))}`
 	else return user.username
 }
 const changeInput = (e: any) => {
@@ -133,7 +132,6 @@ const computedRank = (rankData: UserRank) => {
 							class="combox-option"
 							:class="{
 								'bg-teal-600 text-white': active,
-								'text-gray-900': !active,
 							}"
 						>
 							<span class="user-info">
@@ -160,7 +158,6 @@ const computedRank = (rankData: UserRank) => {
 							class="combox-option"
 							:class="{
 								'bg-teal-600 text-white': active,
-								'text-opacity-100': !active,
 							}"
 						>
 							<span class="user-info">

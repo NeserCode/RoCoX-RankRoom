@@ -24,11 +24,12 @@ export interface UserRank {
 }
 export type StoragedUserRank = string | UserRank
 
+export type UserRankPreferType = "LEVEL" | "BADGE"
 export interface UserInfo {
 	socketId: string
 	username: string
 	userRank: StoragedUserRank
-	userRankPrefer?: "LEVEL" | "BADGE"
+	userRankPrefer?: UserRankPreferType
 	battles?: IORankBattle[]
 }
 
@@ -50,7 +51,10 @@ export interface IORenderRoomFunction {
 export interface IORenderRankFunction {
 	updateConfig: (config: IORankConfig) => void
 	nextRound: () => void
+	battleEmit: () => void
+	battleReply: () => void
 	announceReady: () => void
+	announceFinish: () => void
 }
 
 export interface IORenderFunction {

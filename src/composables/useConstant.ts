@@ -70,5 +70,16 @@ export const useConstants = () => {
 				battles: [] as IORankBattle[],
 			},
 		},
+		DefaultUser: {
+			socketId: "id-for-passerby",
+			username: "路人",
+			userRank: {
+				level: 5,
+				standard: 0,
+				stars: 999,
+			},
+			battles: [],
+			userRankPrefer: "LEVEL",
+		} as UserInfo,
 	}
 }
