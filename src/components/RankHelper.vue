@@ -12,7 +12,7 @@ const { DefaultUserRank, DefaultUser } = useConstants()
 const selectedUser = useStorage("rocox-rank-selected-user", DefaultUser)
 const userRank = useStorage<UserRank>("rocox-user-rank", DefaultUserRank)
 
-const { translateRankStars, compareRank } = useHelpers()
+const { translateRankStars, compareRank, generateRankCase } = useHelpers()
 </script>
 
 <template>
@@ -21,6 +21,7 @@ const { translateRankStars, compareRank } = useHelpers()
 		{{ translateRankStars(rawDatatoObject(selectedUser.userRank)) }}
 		你与其相距
 		{{ compareRank(userRank, rawDatatoObject(selectedUser.userRank)) }} 星
+		{{ generateRankCase(selectedUser) }}
 	</div>
 </template>
 

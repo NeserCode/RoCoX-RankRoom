@@ -18,7 +18,7 @@ import { rawDatatoObject } from "../../composables/utils"
 
 const { DefaultRoom } = useConstants()
 const room = useStorage<IORoom>("rocox-room", DefaultRoom)
-const socketId = useStorage<string>("rocox-socket-id", "")
+const socketIdLocal = useStorage<string>("rocox-socket-id", "")
 
 const passerby: UserInfo = {
 	socketId: "id-for-passerby",
@@ -30,7 +30,7 @@ const passerby: UserInfo = {
 	},
 }
 const sortedUsers = computed(() => {
-	return room.value.users.filter((u) => u.socketId !== socketId.value)
+	return room.value.users.filter((u) => u.socketId !== socketIdLocal.value)
 })
 const selectedUser = useStorage("rocox-rank-selected-user", passerby)
 const query = ref("")
@@ -91,10 +91,13 @@ const computedRank = (rankData: UserRank) => {
 
 	return `${levelText} · ${standardText} · ${stars}星`
 }
+const compareUser = (a: UserInfo, b: UserInfo) => {
+	return a.socketId === b.socketId
+}
 </script>
 
 <template>
-	<Combobox v-model="selectedUser">
+	<Combobox v-model="selectedUser" :by="compareUser">
 		<div class="combox-main">
 			<div class="combox-input-wrapper">
 				<ComboboxInput
@@ -191,13 +194,15 @@ const computedRank = (rankData: UserRank) => {
 }
 
 .combox-input {
-	@apply w-60 text-sm z-10;
+	@apply w-60 text-sm z-10
+	disabled:cursor-not-allowed disabled:opacity-75;
 }
 
 .combox-btn {
 	@apply absolute inset-y-0 -right-10 flex items-center px-1
 	border-2 rounded border-gray-300 dark:border-gray-500 caret-slate-400
-  bg-slate-100 dark:bg-slate-600;
+  bg-slate-100 dark:bg-slate-600
+	disabled:cursor-not-allowed disabled:opacity-75;
 }
 .combox-btn .icon {
 	@apply w-5 h-5 text-gray-400;
@@ -208,7 +213,7 @@ const computedRank = (rankData: UserRank) => {
   font-extrabold text-sm
 	bg-white dark:bg-slate-700
   shadow-lg
-  ring-1 ring-black/5 outline-none overflow-auto
+  ring-1 ring-black/5 outline-none overflow-auto z-10
   transition-all ease-in-out duration-300 -translate-x-1/2;
 }
 .combox-option {

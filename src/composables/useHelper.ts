@@ -19,7 +19,6 @@ export const useHelpers = () => {
 				if (rl < level) {
 					for (let j = minStandard; j <= maxStandard; j++) {
 						result += getStarRound(i)[1]
-						console.log(result)
 					}
 					rs = 0
 				} else {
@@ -29,7 +28,6 @@ export const useHelpers = () => {
 							result += rank.stars
 							break
 						}
-						console.log(result)
 						rs++
 					}
 				}
@@ -57,7 +55,9 @@ export const useHelpers = () => {
 			let losses = 0
 			let counter = 1
 			let bs = user.battles!
-			if (!bs || bs.length < 1) return
+			if (!bs || bs.length < 1 || !Array.isArray(bs)) return
+			console.log(user, bs)
+
 			while (checkIsBattleWon(bs[bs.length - counter], user)) {
 				wins++
 				counter++

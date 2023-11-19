@@ -8,9 +8,9 @@ import {
 } from "@heroicons/vue/24/solid"
 import Dialog from "./UI/Dialog.vue"
 import Combox from "./UI/Combox.vue"
-// import RankHelper from "./RankHelper.vue"
+import RankHelper from "./RankHelper.vue"
 
-import { computed, inject, ref, watch } from "vue"
+import { computed, inject, nextTick, ref, watch } from "vue"
 import { useStorage } from "@vueuse/core"
 
 import { useConstants } from "../composables/useConstant"
@@ -76,10 +76,7 @@ const { useRank } = inject<{ useRank: () => IORenderRankFunction }>(
 const { battleEmit, battleReply } = useRank()
 const isMatchedRanker = computed(() => {
 	if (battleUser.value.socketId === DefaultUser.socketId) return false
-	else {
-		selectedUser.value = battleUser.value
-		return true
-	}
+	else if (selectedUser.value.socketId == battleUser.value.socketId) return true
 })
 const isExceptPasserby = computed(() => {
 	return !(battleUser.value.socketId === DefaultUser.socketId)
@@ -89,7 +86,9 @@ const emitOwnasRanker = () => {
 }
 const replyOwnasRanker = () => {
 	selectedUser.value = battleUser.value
-	battleReply()
+	nextTick(() => {
+		battleReply()
+	})
 }
 </script>
 
@@ -144,22 +143,31 @@ const replyOwnasRanker = () => {
 						</span>
 					</div>
 					<div class="ranking-panel" v-else-if="rankState('RANKING')">
-						<Combox />
-						<!-- <RankHelper /> -->
-						<button type="button" class="btn" @click="emitOwnasRanker">
-							确认对手
-						</button>
-						<button
-							type="button"
-							class="btn"
-							@click="replyOwnasRanker"
-							v-if="isExceptPasserby"
-						>
-							应答 {{ battleUser.username }}
-							{{ computedRanktoText(rawDatatoObject(battleUser.userRank)) }}
-						</button>
-						<div class="rank-actions" v-if="isMatchedRanker">
-							<button type="button" class="btn"></button>
+						<Combox :disabled="isMatchedRanker" />
+						<RankHelper v-if="isMatchedRanker" />
+						<span class="confirm-btns" v-if="!isMatchedRanker">
+							<button type="button" class="btn" @click="emitOwnasRanker">
+								确认对手
+							</button>
+							<button
+								type="button"
+								class="btn reply-btn"
+								@click="replyOwnasRanker"
+								v-if="isExceptPasserby"
+							>
+								<span class="text">应答</span>
+								<span class="username">{{ battleUser.username }}</span>
+								<span class="user-rank">{{
+									computedRanktoText(rawDatatoObject(battleUser.userRank))
+								}}</span>
+							</button>
+						</span>
+						<div class="rank-actions" v-else>
+							<button type="button" class="btn">+ 1</button>
+							<button type="button" class="btn">+ 2</button>
+							<button type="button" class="btn">+ 3</button>
+							<button type="button" class="btn">- 1</button>
+							<button type="button" class="btn danger">失败</button>
 						</div>
 					</div>
 				</div>
@@ -199,6 +207,21 @@ const replyOwnasRanker = () => {
 }
 
 .ranking-panel {
-	@apply relative flex flex-col items-center justify-center min-h-[12rem] gap-2;
+	@apply relative flex flex-col items-center min-h-[12rem] gap-2;
+}
+.confirm-btns {
+	@apply flex justify-center items-center gap-2;
+}
+.confirm-btns .reply-btn {
+	@apply inline-flex flex-wrap max-w-[10rem] justify-center items-center
+	text-sm;
+}
+.reply-btn .username {
+	@apply inline-block max-w-[14ch] px-1 mx-1
+	font-black rounded truncate
+	bg-sky-100 dark:bg-sky-700;
+}
+.reply-btn .user-rank {
+	@apply inline-block opacity-60 z-0;
 }
 </style>

@@ -35,7 +35,7 @@ export const useSocket: () => IORenderFunction = () => {
 	const socketId = useStorage<string>("rocox-socket-id", "")
 	const username = useStorage<string>("rocox-username", "")
 	const userRank = useStorage<UserRank>("rocox-user-rank", DefaultUserRank)
-	const userBattle = useStorage<IORankBattle[]>("rocox-user-rank", [])
+	const userBattle = useStorage<IORankBattle[]>("rocox-user-battles", [])
 	const userRankPrefer = useStorage<UserRankPreferType>(
 		"rocox-user-rank-prefer",
 		"LEVEL"
