@@ -249,6 +249,9 @@ export const useSocket: () => IORenderFunction = () => {
 				announceFinish: () => {
 					socket.emit("rank:finished")
 				},
+				readyReply: () => {
+					socket.emit("rank:ready-reply")
+				},
 			}
 		},
 	}

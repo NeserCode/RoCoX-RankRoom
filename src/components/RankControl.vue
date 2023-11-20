@@ -3,7 +3,7 @@ import { CubeIcon, ExclamationTriangleIcon } from "@heroicons/vue/24/solid"
 import Dialog from "./UI/Dialog.vue"
 import RankPanel from "./RankPanel.vue"
 
-import { computed, inject, reactive, ref, watch } from "vue"
+import { computed, inject, nextTick, reactive, ref, watch } from "vue"
 import { SocketEmiterFunctionKey } from "../token"
 import type {
 	IORenderRankFunction,
@@ -70,11 +70,16 @@ const rankConfigData = reactive<IORankConfig>({
 	},
 })
 
-const { updateConfig, nextRound, announceReady } = useRank()
+const { updateConfig, nextRound, announceReady, readyReply } = useRank()
 const updateRankConfig = () => {
 	updateConfig(rankConfigData)
-
 	isShowRankConfig.value = false
+}
+const readyEmit = () => {
+	nextTick(() => {
+		announceReady()
+		readyReply()
+	})
 }
 
 watch(
@@ -101,7 +106,7 @@ watch(
 			<button
 				type="button"
 				class="btn"
-				@click="announceReady"
+				@click="readyEmit"
 				:disabled="enableFromState('READY')"
 			>
 				准备 · 第{{ room.rank.runtime.round.round + 1 }}轮

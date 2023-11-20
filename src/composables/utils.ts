@@ -1,3 +1,4 @@
+import { nextTick } from "vue"
 import type { UserRank } from "../shared"
 
 export const rawDatatoObject: <T>(data: any) => T = (data: any) => {
@@ -43,4 +44,15 @@ export const computedRanktoText = (rankData: UserRank) => {
 	}
 
 	return `${levelText} · ${standardText} · ${stars}星`
+}
+
+export const tickTask = (fn: () => void, times: number) => {
+	let innerTimes = 0
+
+	while (innerTimes < times) {
+		nextTick(() => {
+			fn()
+		})
+		innerTimes++
+	}
 }

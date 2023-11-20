@@ -1,7 +1,9 @@
 import {
 	IORankBattle,
+	IORankQueue,
 	IORankState,
 	IORankType,
+	IOReadyQueue,
 	IORoomMessageType,
 	IOUserMessageType,
 	UserInfo,
@@ -68,6 +70,10 @@ export const useConstants = () => {
 					},
 				},
 				battles: [] as IORankBattle[],
+			},
+			queues: {
+				rank: [] as IORankQueue,
+				ready: [] as IOReadyQueue,
 			},
 		},
 		DefaultUser: {

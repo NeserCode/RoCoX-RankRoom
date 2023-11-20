@@ -55,6 +55,7 @@ export interface IORenderRankFunction {
 	battleReply: () => void
 	announceReady: () => void
 	announceFinish: () => void
+	readyReply: () => void
 }
 
 export interface IORenderFunction {
@@ -118,6 +119,7 @@ export interface IORoom {
 	password: string
 	users: UserInfo[]
 	rank: IORank
+	queues: IOQueues
 }
 
 export type IORoomMessageType = "ROOM_ERROR" | "ROOM_WARNING" | "ROOM_SUCCESS"
@@ -142,3 +144,10 @@ export interface IOUserMessage {
 }
 
 export type IOMessage = IOUserMessage | IORoomMessage | IORankMessage
+
+export type IORankQueue = UserInfo[]
+export type IOReadyQueue = UserInfo[]
+export interface IOQueues {
+	rank: IORankQueue
+	ready: IOReadyQueue
+}

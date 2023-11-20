@@ -12,22 +12,53 @@ import RankHelper from "./RankHelper.vue"
 
 import { computed, inject, nextTick, ref, watch } from "vue"
 import { useStorage } from "@vueuse/core"
-
 import { useConstants } from "../composables/useConstant"
-import { rawDatatoObject, computedRanktoText } from "../composables/utils"
+import {
+	rawDatatoObject,
+	computedRanktoText,
+	tickTask,
+} from "../composables/utils"
 
 import type {
 	IORankConfig,
 	IORankState,
 	IORenderRankFunction,
+	IORenderUserFunction,
 	IORoom,
 	UserInfo,
+	UserRank,
 } from "../shared"
 import { SocketEmiterFunctionKey } from "../token"
+import { useRankActions } from "../composables/useRankAction"
 
-const { DefaultRoom, RankTypeMapData, DefaultUser } = useConstants()
+const { useUsers } = inject<{ useUsers: () => IORenderUserFunction }>(
+	SocketEmiterFunctionKey,
+	{ useUsers: () => ({ updateUsertoServer: () => {} }) }
+)
+const { useRank } = inject<{ useRank: () => IORenderRankFunction }>(
+	SocketEmiterFunctionKey,
+	{
+		useRank: () => ({
+			updateConfig: (_config: IORankConfig) => {},
+			nextRound: () => {},
+			announceReady: () => {},
+			announceFinish: () => {},
+			battleEmit: () => {},
+			battleReply: () => {},
+			readyReply: () => {},
+		}),
+	}
+)
+const { battleEmit, battleReply, readyReply } = useRank()
+const { updateUsertoServer } = useUsers()
+
+const { DefaultRoom, RankTypeMapData, DefaultUser, DefaultUserRank } =
+	useConstants()
 const RankTypeMap = new Map(RankTypeMapData)
 const room = useStorage<IORoom>("rocox-room", DefaultRoom)
+const socketId = useStorage<string>("rocox-socket-id", "")
+const username = useStorage<string>("rocox-username", "")
+const userRank = useStorage<UserRank>("rocox-user-rank", DefaultUserRank)
 const battleUser = useStorage<UserInfo>("rocox-battle-user", DefaultUser)
 const selectedUser = useStorage("rocox-rank-selected-user", DefaultUser)
 
@@ -51,6 +82,7 @@ watch(
 	() => room.value.rank.state,
 	(v) => {
 		if (v === "READY") {
+			openRankPanel()
 			battleUser.value = DefaultUser
 			selectedUser.value = DefaultUser
 		}
@@ -60,23 +92,14 @@ watch(
 	{ immediate: true }
 )
 
-const { useRank } = inject<{ useRank: () => IORenderRankFunction }>(
-	SocketEmiterFunctionKey,
-	{
-		useRank: () => ({
-			updateConfig: (_config: IORankConfig) => {},
-			nextRound: () => {},
-			announceReady: () => {},
-			announceFinish: () => {},
-			battleEmit: () => {},
-			battleReply: () => {},
-		}),
-	}
-)
-const { battleEmit, battleReply } = useRank()
 const isMatchedRanker = computed(() => {
 	if (battleUser.value.socketId === DefaultUser.socketId) return false
-	else if (selectedUser.value.socketId == battleUser.value.socketId) return true
+	else if (selectedUser.value.socketId == battleUser.value.socketId) {
+		nextTick(() => {
+			replyOwnasRanker()
+		})
+		return true
+	}
 })
 const isExceptPasserby = computed(() => {
 	return !(battleUser.value.socketId === DefaultUser.socketId)
@@ -89,6 +112,28 @@ const replyOwnasRanker = () => {
 	nextTick(() => {
 		battleReply()
 	})
+}
+
+// rank actions
+const { plusStars: plusFn, minusStars: minusFn } = useRankActions(
+	userRank.value
+)
+const updateUserData = () => {
+	updateUsertoServer({
+		username: username.value,
+		socketId: socketId.value,
+		userRank: JSON.stringify({ ...userRank.value }),
+	})
+}
+const plusStars = (stars: 1 | 2 | 3) => {
+	tickTask(plusFn, stars)
+	updateUserData()
+	isShowRankPanel.value = false
+}
+const minusStars = (stars: 0 | 1) => {
+	if (stars === 1) minusFn()
+	updateUserData()
+	isShowRankPanel.value = false
 }
 </script>
 
@@ -124,6 +169,9 @@ const replyOwnasRanker = () => {
 							<MegaphoneIcon class="icon" />
 							<span class="text">正在准备发车，请等待发车倒计时。</span>
 						</span>
+						<button type="button" class="btn" @click="readyReply">
+							响应准备
+						</button>
 						<span class="tip">
 							<Cog8ToothIcon class="icon" />
 							<span class="text">
@@ -163,11 +211,22 @@ const replyOwnasRanker = () => {
 							</button>
 						</span>
 						<div class="rank-actions" v-else>
-							<button type="button" class="btn">+ 1</button>
-							<button type="button" class="btn">+ 2</button>
-							<button type="button" class="btn">+ 3</button>
-							<button type="button" class="btn">- 1</button>
-							<button type="button" class="btn danger">失败</button>
+							<button type="button" class="btn" @click="plusStars(1)">
+								+ 1
+							</button>
+							<button type="button" class="btn" @click="plusStars(2)">
+								+ 2
+							</button>
+							<button type="button" class="btn" @click="plusStars(3)">
+								+ 3
+							</button>
+							<button type="button" class="btn" @click="minusStars(0)">
+								- 0
+							</button>
+							<button type="button" class="btn" @click="minusStars(1)">
+								- 1
+							</button>
+							<button type="button" class="btn danger">匹配失败</button>
 						</div>
 					</div>
 				</div>
@@ -223,5 +282,9 @@ const replyOwnasRanker = () => {
 }
 .reply-btn .user-rank {
 	@apply inline-block opacity-60 z-0;
+}
+
+.rank-actions {
+	@apply flex items-center gap-2;
 }
 </style>
