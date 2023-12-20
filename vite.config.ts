@@ -19,6 +19,13 @@ export default defineConfig(async () => ({
 	server: {
 		port: 5678,
 		strictPort: true,
+		proxy: {
+			"/api": {
+				target: "http://localhost:3000/",
+				changeOrigin: true,
+				rewrite: (path) => path.replace(/^\/api/, ""), // 不可以省略rewrite
+			},
+		},
 	},
 	// 3. to make use of `TAURI_DEBUG` and other env variables
 	// https://tauri.app/v1/api/config#buildconfig.beforedevcommand
