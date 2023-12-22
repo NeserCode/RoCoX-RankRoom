@@ -147,17 +147,14 @@ export const useSocket: () => IORenderFunction = () => {
 			socket.on("rank:update-config", (roomData: IORoom) => {
 				room.value = roomData
 			})
-			socket.on("rank:ready", (data: IORankMessage) => {
-				room.value.rank.state = "READY"
-				room.value.rank.runtime = data.runtime
+			socket.on("rank:ready", (roomData: IORoom) => {
+				room.value = roomData
 			})
-			socket.on("rank:count", (data: IORankMessage) => {
-				room.value.rank.state = "COUNTING"
-				room.value.rank.runtime = data.runtime
+			socket.on("rank:count", (roomData: IORoom) => {
+				room.value = roomData
 			})
-			socket.on("rank:rank", (data: IORankMessage) => {
-				room.value.rank.state = "RANKING"
-				room.value.rank.runtime = data.runtime
+			socket.on("rank:rank", (roomData: IORoom) => {
+				room.value = roomData
 			})
 
 			socket.on(

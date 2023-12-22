@@ -91,7 +91,7 @@ const getComputedTimeString = (t: number) => {
 	const oneDay = 24 * oneHour
 
 	if (diff < oneSecond) {
-		if (diff < 500) return "1 秒前"
+		if (diff < 999) return "1 秒前"
 		else return `${Math.floor(diff / 1000)} 秒前`
 	} else if (diff < oneMinute) {
 		return `${Math.floor(diff / oneSecond)} 秒前`

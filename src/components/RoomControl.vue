@@ -168,7 +168,7 @@ const copyText = async (text: string) => {
 			<button
 				type="button"
 				class="btn"
-				:disabled="!socketState.connected"
+				:disabled="!socketState.connected && !!IOCreationKey.length"
 				@click="openCreateRoomPanel"
 			>
 				<CubeIcon class="icon" />

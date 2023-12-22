@@ -1,4 +1,4 @@
-import { Socket } from "socket.io-client"
+import { Socket } from "socket.io"
 
 export interface IOState {
 	connected: boolean
@@ -50,6 +50,10 @@ export interface IORankConfig {
 export interface IORankRuntime extends IORankConfig {
 	id: string
 }
+export interface IORankBattleEmitInfo {
+	self: UserInfo
+	opponent: UserInfo
+}
 export interface IORankBattleDiff {
 	winStar: number
 	loseStar: number
@@ -83,6 +87,20 @@ export interface IORoom {
 	users: UserInfo[]
 	rank: IORank
 	queues: IOQueues
+}
+
+export type RoomCreationInfo = {
+	id: string
+	name: string
+	password: string
+}
+export type RoomDestoryInfo = {
+	id: string
+	password: string
+}
+export type RoomJoinInfo = {
+	id: string
+	password: string
 }
 
 export type IORoomMessageType = "ROOM_ERROR" | "ROOM_WARNING" | "ROOM_SUCCESS"
