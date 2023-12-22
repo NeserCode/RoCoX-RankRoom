@@ -135,6 +135,11 @@ const minusStars = (stars: 0 | 1) => {
 	updateUserData()
 	isShowRankPanel.value = false
 }
+
+// ready
+const isReady = computed(() =>
+	room.value.queues.ready.some((u) => u.socketId === socketId.value)
+)
 </script>
 
 <template>
@@ -170,7 +175,8 @@ const minusStars = (stars: 0 | 1) => {
 							<span class="text">正在准备发车，请等待发车倒计时。</span>
 						</span>
 						<button type="button" class="btn" @click="readyReply">
-							响应准备
+							{{ isReady ? "已" : null }}响应准备
+							{{ room.queues.ready.length }}/{{ room.users.length }}
 						</button>
 						<span class="tip">
 							<Cog8ToothIcon class="icon" />
@@ -256,6 +262,9 @@ const minusStars = (stars: 0 | 1) => {
 .counting-tip .icon {
 	@apply w-12 h-12 my-4;
 }
+.ready-tip {
+	@apply mb-0;
+}
 
 .counting-tip {
 	@apply animate-none;
@@ -282,6 +291,10 @@ const minusStars = (stars: 0 | 1) => {
 }
 .reply-btn .user-rank {
 	@apply inline-block opacity-60 z-0;
+}
+
+.ready-panel {
+	@apply flex flex-col items-center justify-center gap-3;
 }
 
 .rank-actions {

@@ -44,6 +44,7 @@ const { onRoomCreated, onRoomJoin, onRoomLeft, onRoomDestory } = useRooms(
 const {
 	onUpdateRankConfig,
 	onReadyRank,
+	onReadyRankReply,
 	onRankRound,
 	onBattleEmit,
 	onBattleReply,
@@ -64,6 +65,7 @@ io.on("connection", (socket: Socket) => {
 	// Rank
 	socket.on("rank:config", onUpdateRankConfig)
 	socket.on("rank:ready", onReadyRank)
+	socket.on("rank:ready-reply", onReadyRankReply)
 	socket.on("rank:next-round", onRankRound)
 	socket.on("rank:battle-emit", onBattleEmit)
 	socket.on("rank:battle-reply", onBattleReply)

@@ -129,7 +129,7 @@ export const useRooms = (
 			`#${room.name}# 创建成功，现在可以被连接。`
 		)
 
-		console.log("[Room Creation]", room.id)
+		console.log("[Room Creation]", room.id, room.name)
 	}
 
 	const onRoomJoin = function (this: Socket, payload: RoomJoinInfo) {
@@ -161,7 +161,7 @@ export const useRooms = (
 		)
 		io.emit("rooms:join", room)
 
-		console.log("[User Join Room]", room.id)
+		console.log("[User Join Room]", room.id, room.name)
 	}
 
 	const onRoomLeft = function (this: Socket, id: string, s?: Socket) {
@@ -190,7 +190,7 @@ export const useRooms = (
 		)
 		socket.emit("rooms:left")
 
-		console.log("[User Left Room]", room.id)
+		console.log("[User Left Room]", room.id, room.name)
 	}
 
 	const onRoomDestory = function (this: Socket, payload: RoomDestoryInfo) {
@@ -211,7 +211,7 @@ export const useRooms = (
 			io.to(room.id).emit("rooms:destory", room)
 		}
 
-		console.log("[Room Destory]", room.id)
+		console.log("[Room Destory]", room.id, room.name)
 	}
 
 	return {

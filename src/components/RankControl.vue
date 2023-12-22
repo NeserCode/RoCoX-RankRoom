@@ -24,6 +24,7 @@ const { useRank } = inject<{ useRank: () => IORenderRankFunction }>(
 			announceFinish: () => {},
 			battleEmit: () => {},
 			battleReply: () => {},
+			readyReply: () => {},
 		}),
 	}
 )
