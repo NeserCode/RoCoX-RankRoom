@@ -51,6 +51,7 @@ export const useSocket: () => IORenderFunction = () => {
 	if (username.value === "") username.value = "无名客"
 
 	const socket = io(serverAddress, {
+		path: "/socket",
 		query: {
 			username: username.value,
 			userRank: JSON.stringify(userRank.value),
@@ -75,6 +76,7 @@ export const useSocket: () => IORenderFunction = () => {
 				socketId.value = socket.id
 				socket.emit("users:connect", {
 					socketId: socketId.value,
+					userId: username.value,
 					username: username.value,
 					userRank: JSON.stringify(userRank.value),
 				})
